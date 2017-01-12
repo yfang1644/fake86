@@ -33,7 +33,6 @@
 #define strcmpi strcasecmp
 #endif
 
-uint8_t inputline[1024];
 extern uint8_t running;
 
 extern uint8_t insertdisk (uint8_t drivenum, char *filename);
@@ -46,7 +45,7 @@ void waitforcmd (uint8_t *dst, uint16_t maxlen)
     uint8_t cc;
 
     maxlen -= 2;
-    inputline[0] = 0;
+    dst[0] = 0;
     while (running) {
         if (_kbhit () ) {
             cc = (uint8_t) _getch ();
@@ -58,7 +57,7 @@ void waitforcmd (uint8_t *dst, uint16_t maxlen)
             case 8: //backspace
                 if (inputptr > 0) {
                     printf ("%c %c", 8, 8);
-                    inputline[--inputptr] = 0;
+                    dst[--inputptr] = 0;
                 }
                 break;
             case 13: //enter
@@ -66,8 +65,8 @@ void waitforcmd (uint8_t *dst, uint16_t maxlen)
                 return;
                 default:
                 if (inputptr < maxlen) {
-                    inputline[inputptr++] = cc;
-                    inputline[inputptr] = 0;
+                    dst[inputptr++] = cc;
+                    dst[inputptr] = 0;
                     printf ("%c",cc);
                 }
             }
@@ -104,12 +103,14 @@ void runconsole (void *dummy)
 void *runconsole (void *dummy)
 #endif
 {
+    uint8_t inputline[1024];
+
     printf ("\nFake86 management console\n");
     printf ("Type \"help\" for a summary of commands.\n");
     while (running) {
         printf ("\n>");
         waitforcmd (inputline, sizeof(inputline) );
-        if (strcmpi ( (const char *) inputline, "change fd0") == 0) {
+        if (!strcmpi ( (const char *) inputline, "change fd0")) {
             printf ("Path to new image file: ");
             waitforcmd (inputline, sizeof(inputline) );
             if (strlen (inputline) > 0) {
@@ -119,8 +120,7 @@ void *runconsole (void *dummy)
                 ejectdisk (0);
                 printf ("Floppy image ejected from first drive.\n");
             }
-        }
-        else if (strcmpi ( (const char *) inputline, "change fd1") == 0) {
+        } else if (!strcmpi ( (const char *) inputline, "change fd1")) {
             printf ("Path to new image file: ");
             waitforcmd (inputline, sizeof(inputline) );
             if (strlen (inputline) > 0) {
@@ -129,9 +129,9 @@ void *runconsole (void *dummy)
                 ejectdisk (1);
                 printf ("Floppy image ejected from second drive.\n");
             }
-        } else if (strcmpi ( (const char *) inputline, "help") == 0) {
+        } else if (!strcmpi ( (const char *) inputline, "help")) {
             consolehelp ();
-        } else if (strcmpi ( (const char *) inputline, "quit") == 0) {
+        } else if (!strcmpi ( (const char *) inputline, "quit")) {
             running = 0;
         } else printf("Invalid command was entered.\n");
     }

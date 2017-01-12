@@ -28,8 +28,6 @@
 
 struct structpic i8259;
 
-extern uint8_t keyboardwaitack;
-
 uint8_t in8259(uint16_t portnum)
 {
     switch (portnum & 1) {
@@ -60,7 +58,6 @@ void out8259(uint16_t portnum, uint8_t value)
         }
         if (value & 0x20) {
             //EOI command
-            keyboardwaitack = 0;
             for (i=0; i<8; i++)
             if ((i8259.isr >> i) & 1) {
                 i8259.isr ^= (1 << i);
@@ -96,7 +93,6 @@ uint8_t nextintr()
 void doirq(uint8_t irqnum)
 {
     i8259.irr |= (1 << irqnum);
-    if (irqnum == 1) keyboardwaitack = 1;
 }
 
 void init8259()

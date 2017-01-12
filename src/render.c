@@ -38,7 +38,7 @@ uint32_t *scalemap = NULL;
 uint8_t regenscalemap = 1;
 
 extern uint8_t RAM[0x100000], portram[0x10000];
-extern uint8_t VRAM[262144], vidmode, cgabg, blankattr, vidgfxmode, vidcolor, running;
+extern uint8_t VRAM[262144], vidmode, cgabg, vidgfxmode, vidcolor, running;
 extern uint16_t cursx, cursy, cols, rows, cursorvisible;
 extern uint8_t updatedscreen;
 extern uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
@@ -145,8 +145,8 @@ void stretchblit (SDL_Surface *target)
     limity = (uint32_t)((double) nh / (double) target->h);
 
     if (SDL_MUSTLOCK (target) )
-    if (SDL_LockSurface (target) < 0)
-    return;
+        if (SDL_LockSurface (target) < 0)
+            return;
 
     lasty = 0;
     scalemapptr = 0;
@@ -160,24 +160,24 @@ void stretchblit (SDL_Surface *target)
         for (dstx=0; dstx<(uint32_t)target->w; dstx++) {
             srcx = scalemap[scalemapptr++];
             pixelrgb = (uint8_t *) &prestretch[srcy][srcx];
-            r = pixelrgb[0];
-            g = pixelrgb[1];
-            b = pixelrgb[2];
+            r = *pixelrgb++;
+            g = *pixelrgb++;
+            b = *pixelrgb++;
             if (srcx == lastx) consecutivex++;
             else consecutivex = 0;
             if ( (consecutivex > limitx) && (consecutivey > limity) ) {
                 pixelrgb = (uint8_t *) &prestretch[srcy][srcx+1];
-                r += pixelrgb[0];
-                g += pixelrgb[1];
-                b += pixelrgb[2];
+                r += *pixelrgb++;
+                g += *pixelrgb++;
+                b += *pixelrgb++;
                 pixelrgb = (uint8_t *) &prestretch[srcy+1][srcx];
-                r += pixelrgb[0];
-                g += pixelrgb[1];
-                b += pixelrgb[2];
+                r += *pixelrgb++;
+                g += *pixelrgb++;
+                b += *pixelrgb++;
                 pixelrgb = (uint8_t *) &prestretch[srcy+1][srcx+1];
-                r += pixelrgb[0];
-                g += pixelrgb[1];
-                b += pixelrgb[2];
+                r += *pixelrgb++;
+                g += *pixelrgb++;
+                b += *pixelrgb++;
                 r = r >> 2;
                 g = g >> 2;
                 b = b >> 2;
@@ -185,9 +185,9 @@ void stretchblit (SDL_Surface *target)
             }
             else if (consecutivex > limitx) {
                 pixelrgb = (uint8_t *) &prestretch[srcy][srcx+1];
-                r += pixelrgb[0];
-                g += pixelrgb[1];
-                b += pixelrgb[2];
+                r += *pixelrgb++;
+                g += *pixelrgb++;
+                b += *pixelrgb++;
                 r = r >> 1;
                 g = g >> 1;
                 b = b >> 1;
@@ -195,9 +195,9 @@ void stretchblit (SDL_Surface *target)
             }
             else if (consecutivey > limity) {
                 pixelrgb = (uint8_t *) &prestretch[srcy+1][srcx];
-                r += pixelrgb[0];
-                g += pixelrgb[1];
-                b += pixelrgb[2];
+                r += *pixelrgb++;
+                g += *pixelrgb++;
+                b += *pixelrgb++;
                 r = r >> 1;
                 g = g >> 1;
                 b = b >> 1;

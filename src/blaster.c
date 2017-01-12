@@ -177,7 +177,6 @@ void cmdBlaster (uint8_t value)
         break;
     }
 }
-extern uint16_t adlibport;
 
 uint8_t mixer[256], mixerindex = 0;
 void outBlaster (uint16_t portnum, uint8_t value)
@@ -189,11 +188,11 @@ void outBlaster (uint16_t portnum, uint8_t value)
     switch (portnum) {
     case 0x0:
     case 0x8:
-        outadlib (adlibport, value);
+        outadlib (ADLIBPORT, value);
         break;
     case 0x1:
     case 0x9:
-        outadlib (adlibport+1, value);
+        outadlib (ADLIBPORT+1, value);
         break;
     case 0x4: //mixer address port
         mixerindex = value;

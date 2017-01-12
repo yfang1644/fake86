@@ -48,11 +48,9 @@ double decaytable[16] = { 0.99999, 0.999985, 0.99998, 0.999975, 0.99997, 0.99996
 double adlibenv[9], adlibdecay[9], adlibattack[9];
 uint8_t adlibdidattack[9], adlibpercussion = 0, adlibstatus = 0;
 
-uint16_t adlibport = 0x388;
-
 void outadlib (uint16_t portnum, uint8_t value)
 {
-    if (portnum == adlibport) {
+    if (portnum == ADLIBPORT) {
         adlibaddr = value;
         return;
     }

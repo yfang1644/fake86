@@ -44,12 +44,13 @@ uint8_t speakerenabled = 0;
 
 extern uint64_t gensamplerate, sampleticks, hostfreq;
 extern int16_t adlibgensample();
-extern int16_t speakergensample();
+extern int16_t speakergensample(uint64_t samplerate);
 extern int16_t getssourcebyte();
 extern int16_t getBlasterSample();
 extern uint8_t usessource;
 
-void create_output_wav (uint8_t *filename) {
+void create_output_wav (uint8_t *filename)
+{
 	printf ("Creating %s for audio logging... ", filename);
 	wav_file = fopen (filename, "wb");
 	if (wav_file == NULL) {
@@ -88,19 +89,19 @@ uint8_t audiobufferfilled() {
 	return(0);
 }
 
-void tickaudio() {
+void tickaudio()
+{
 	int16_t sample;
 	if (audbufptr >= usebuffersize) return;
 	sample = adlibgensample() >> 4;
 	if (usessource) sample += getssourcebyte();
 	sample += getBlasterSample();
-	if (speakerenabled) sample += (speakergensample() >> 1);
+	if (speakerenabled) sample += (speakergensample(gensamplerate) >> 1);
 	if (audbufptr < sizeof(audbuf) ) audbuf[audbufptr++] = (uint8_t) ((uint16_t) sample+128);
 }
 
-extern uint64_t timinginterval;
-extern void inittiming();
-void fill_audio (void *udata, int8_t *stream, int len) {
+void fill_audio (void *udata, int8_t *stream, int len)
+{
 	memcpy (stream, audbuf, len);
 	memmove (audbuf, &audbuf[len], usebuffersize - len);
 
@@ -108,7 +109,8 @@ void fill_audio (void *udata, int8_t *stream, int len) {
 	if (audbufptr < 0) audbufptr = 0;
 }
 
-void initaudio() {
+void initaudio()
+{
 	printf ("Initializing audio stream... ");
 
 	if (usesamplerate < 4000) usesamplerate = 4000;
@@ -141,7 +143,8 @@ void initaudio() {
 	return;
 }
 
-void killaudio() {
+void killaudio()
+{
 	SDL_PauseAudio (1);
 
 	if (wav_file == NULL) return;

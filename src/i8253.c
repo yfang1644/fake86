@@ -26,15 +26,14 @@
 #include <memory.h>
 #include "i8253.h"
 #include "mutex.h"
-
-extern void set_port_write_redirector (uint16_t startport, uint16_t endport, void *callback);
-extern void set_port_read_redirector (uint16_t startport, uint16_t endport, void *callback);
+#include "ports.h"
 
 struct i8253_s i8253;
 
-extern uint64_t hostfreq, lasttick, curtick, tickgap, totalexec;
+extern uint64_t hostfreq, tickgap;
 
-void out8253 (uint16_t portnum, uint8_t value) {
+void out8253 (uint16_t portnum, uint8_t value)
+{
 	uint8_t curbyte;
 	portnum &= 3;
 	switch (portnum) {
@@ -76,7 +75,8 @@ uint8_t in8253 (uint16_t portnum) {
 				if ( (i8253.accessmode[portnum] == 0) || (i8253.accessmode[portnum] == PIT_MODE_LOBYTE) || ( (i8253.accessmode[portnum] == PIT_MODE_TOGGLE) && (i8253.bytetoggle[portnum] == 0) ) ) curbyte = 0;
 				else if ( (i8253.accessmode[portnum] == PIT_MODE_HIBYTE) || ( (i8253.accessmode[portnum] == PIT_MODE_TOGGLE) && (i8253.bytetoggle[portnum] == 1) ) ) curbyte = 1;
 				if ( (i8253.accessmode[portnum] == 0) || (i8253.accessmode[portnum] == PIT_MODE_TOGGLE) ) i8253.bytetoggle[portnum] = (~i8253.bytetoggle[portnum]) & 1;
-				if (curbyte == 0) { //low byte
+				if (curbyte == 0) {
+                    //low byte
 						return ( (uint8_t) i8253.counter[portnum]);
 					}
 				else {   //high byte
@@ -87,7 +87,8 @@ uint8_t in8253 (uint16_t portnum) {
 	return (0);
 }
 
-void init8253() {
+void init8253()
+{
 	memset (&i8253, 0, sizeof (i8253) );
 	set_port_write_redirector (0x40, 0x43, &out8253);
 	set_port_read_redirector (0x40, 0x43, &in8253);

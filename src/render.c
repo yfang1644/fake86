@@ -52,7 +52,6 @@ uint32_t framedelay = 20;
 uint8_t scrmodechange = 0, noscale = 0, nosmooth = 1, renderbenchmark = 0, doaudio = 1;
 char windowtitle[128];
 
-void initcga();
 #ifdef _WIN32
 void VideoThread (void *dummy);
 #else
@@ -63,6 +62,17 @@ void setwindowtitle (uint8_t *extra) {
 	char temptext[128];
 	sprintf (temptext, "%s%s", windowtitle, extra);
 	SDL_WM_SetCaption ( (const char *) temptext, NULL);
+}
+
+void loadCGAfont(char *file) {
+	FILE *fontfile;
+	fontfile = fopen (file, "rb");
+	if (fontfile==NULL) {
+			printf ("FATAL: Cannot open %s !\n", file);
+			exit (1);
+		}
+	fread (fontcga, 1, 4096,fontfile);
+	fclose (fontfile);
 }
 
 uint8_t initscreen (uint8_t *ver) {
@@ -76,7 +86,7 @@ uint8_t initscreen (uint8_t *ver) {
 	if (screen == NULL) return (0);
 	sprintf (windowtitle, "%s", ver);
 	setwindowtitle ("");
-	initcga();
+	loadCGAfont(PATH_DATAFILES "font8x16.dat");
 #ifdef _WIN32
 	InitializeCriticalSection (&screenmutex);
 	_beginthread (VideoThread, 0, NULL);

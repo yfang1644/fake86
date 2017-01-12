@@ -249,7 +249,7 @@ int main (int argc, char *argv[]) {
 	biossize = loadbios (biosfile);
 	if (!biossize) return (-1);
 #ifdef DISK_CONTROLLER_ATA
-	if (!loadrom (0xD0000UL, PATH_DATAFILES "ide_xt.bin", 1) ) return (-1);
+	if (!loadrom (0xD0000UL, biosfile, 1) ) return (-1);
 #endif
 	if (biossize <= 8192) {
 		loadrom (0xF6000UL, PATH_DATAFILES "rombasic.bin", 0);

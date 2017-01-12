@@ -75,15 +75,14 @@ void waitforcmd (uint8_t *dst, uint16_t maxlen) {
 			SDL_Delay(10); //don't waste CPU time while in the polling loop
 		}
 #else
-    int i;
+    int n;
     fgets(dst, maxlen, stdin);
-    do {
-        if (dst[i] == '\n') {
-            dst[i] = '\0';
+    for (n = 0; n < maxlen; n++) {
+        if (dst[n] == '\n') {
+            dst[n] = '\0';
             break;
         }
-    } while(++i < maxlen);
-
+    }
 #endif
 }
 

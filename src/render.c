@@ -327,6 +327,8 @@ void doubleblit (SDL_Surface *target) {
 extern uint16_t vtotal;
 void draw () {
 	uint32_t planemode, vgapage, color, chary, charx, vidptr, divx, divy, curchar, curpixel, usepal, intensity, blockw, curheight, x1, y1;
+    uint8_t bytecolor;
+
 	switch (vidmode) {
 			case 0:
 			case 1:
@@ -351,14 +353,15 @@ void draw () {
 									chary = y/4;
 									vidptr = vgapage + videobase + chary*cols*2 + charx*2;
 									curchar = RAM[vidptr];
-									color = fontcga[curchar*128 + (y%4) *8 + ( (x/divx) %8) ];
+                                bytecolor = fontcga[curchar*16 + (y%4)];
 								}
 							else {
 									chary = y/16;
 									vidptr = videobase + chary*cols*2 + charx*2;
 									curchar = RAM[vidptr];
-									color = fontcga[curchar*128 + (y%16) *8 + ( (x/divx) %8) ];
+                                bytecolor = fontcga[curchar*16 + y%16];
 								}
+                                color = (bytecolor << ((x/divx)&7) ) & 0x80;
 							if (vidcolor) {
 									/*if (!color) if (portram[0x3D8]&128) color = palettecga[ (RAM[vidptr+1]/16) &7];
 										else*/ if (!color) color = palettecga[RAM[vidptr+1]/16]; //high intensity background

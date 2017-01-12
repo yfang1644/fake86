@@ -43,10 +43,10 @@ extern uint8_t scrmodechange;
 
 uint8_t VRAM[262144], vidmode, cgabg, blankattr, vidgfxmode, vidcolor;
 uint16_t cursx, cursy, cols = 80, rows = 25, vgapage, cursorposition, cursorvisible;
-uint8_t updatedscreen, clocksafe, port3da, port6, portout16;
+uint8_t updatedscreen, clocksafe, port3da, port6;
 uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
 uint32_t videobase= 0xB8000, textbase = 0xB8000, x, y;
-uint8_t fontcga[32768];
+uint8_t fontcga[4096];
 uint32_t palettecga[16], palettevga[256];
 uint32_t usefullscreen = 0, usegrabmode = SDL_GRAB_OFF;
 
@@ -257,7 +257,7 @@ void initcga() {
 			printf ("FATAL: Cannot open " PATH_DATAFILES "asciivga!\n");
 			exit (1);
 		}
-	fread (&fontcga[0], 32768, 1, fontfile);
+	fread (fontcga, 1, 4096,fontfile);
 	fclose (fontfile);
 
 	palettecga[0] = 0;

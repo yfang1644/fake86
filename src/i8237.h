@@ -20,12 +20,12 @@
 #include <stdint.h>
 
 struct dmachan_s {
-	uint32_t page;
-	uint32_t addr;
-	uint32_t reload;
-	uint32_t count;
-	uint8_t direction;
-	uint8_t autoinit;
-	uint8_t writemode;
-	uint8_t masked;
+    uint32_t page;
+    uint32_t addr;
+    uint32_t reload;
+    uint32_t count;
+    uint8_t direction;
+    uint8_t autoinit;
+    uint8_t writemode;
+    uint8_t masked;
 };

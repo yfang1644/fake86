@@ -29,24 +29,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ports.h"
 
 extern struct structpic i8259;
-uint64_t timerfreq;
 
 uint8_t byteregtable[8] = { regal, regcl, regdl, regbl, regah, regch, regdh, regbh };
 
-uint8_t	RAM[0x100000], readonly[0x100000];
+uint8_t	RAM[0x100000], readonly[0x100000]; //1MB
+uint8_t	portram[0x10000];  // 64KB
 uint8_t	opcode, segoverride, reptype, bootdrive = 0, hdcount = 0, hltstate = 0;
-uint16_t segregs[4], savecs, saveip, ip, useseg, oldsp;
+uint16_t segregs[4], savecs, saveip, ip, useseg;
 uint8_t	cf, pf, af, zf, sf, tf, ifl, df, of, mode, reg, rm;
 uint16_t oper1, oper2, res16, disp16, stacksize, frametemp;
 uint8_t	oper1b, oper2b, res8, disp8, nestlev;
 uint32_t ea;
 uint64_t totalexec;
 
-extern uint16_t	VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
+extern uint16_t	VGA_SC[0x100];
 extern uint8_t updatedscreen;
 union _bytewordregs_ regs;
 
-uint8_t	portram[0x10000];  // 64KB
 uint8_t	running = 0, didbootstrap = 0;
 uint8_t	ethif;
 
@@ -1214,7 +1213,7 @@ uint32_t prefetch_base = 0;
 
 void exec86 (uint32_t execloops)
 {
-    uint16_t oldcf;
+    uint16_t oldcf, oldsp;
     uint8_t tempcf;
     uint16_t temp16;
     uint32_t loopcount;
@@ -1222,9 +1221,6 @@ void exec86 (uint32_t execloops)
     static uint16_t firstip;
     static uint16_t trap_toggle = 0;
     uint32_t temp1, temp2, temp3;
-    uint64_t   counterticks = 10000;
-
-    counterticks = (uint64_t) ( (double) timerfreq / (double) 65536.0);
 
     for (loopcount = 0; loopcount < execloops; loopcount++) {
         if ( (totalexec & TIMING_INTERVAL) == 0) timing();

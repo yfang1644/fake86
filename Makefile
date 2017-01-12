@@ -11,7 +11,7 @@ $(TARGET): $(OBJ)
 
 %.o: %.c
 	$(CC) -c $< -o $@ -DPATH_DATAFILES=\"$(DATAPATH)/\" $(CFLAGS)
-	
+
 install:
 	mkdir -p $(DESTDIR)/$(BINPATH)
 	mkdir -p $(DESTDIR)/$(DATAPATH)

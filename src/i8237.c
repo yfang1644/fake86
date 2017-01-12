@@ -30,8 +30,6 @@
 struct dmachan_s dmachan[4];
 uint8_t flipflop = 0;
 
-extern uint8_t read86 (uint32_t addr32);
-
 extern uint8_t RAM[0x100000];
 uint8_t read8237 (uint8_t channel)
 {

@@ -36,11 +36,11 @@ struct structadlibop {
 } adlibop[9][2];
 
 struct structadlibchan {
-	uint16_t freq;
-	double convfreq;
-	uint8_t keyon;
-	uint16_t octave;
-	uint8_t wavesel;
+    uint16_t freq;
+    double convfreq;
+    uint8_t keyon;
+    uint16_t octave;
+    uint8_t wavesel;
 } adlibch[9];
 
 double attacktable[16] = { 1.0003, 1.00025, 1.0002, 1.00015, 1.0001, 1.00009, 1.00008, 1.00007, 1.00006, 1.00005, 1.00004, 1.00003, 1.00002, 1.00001, 1.000005 }; //1.003, 1.05, 1.01, 1.015, 1.02, 1.025, 1.03, 1.035, 1.04, 1.045, 1.05, 1.055, 1.06, 1.065, 1.07, 1.075 };
@@ -52,7 +52,7 @@ uint16_t adlibport = 0x388;
 
 void outadlib (uint16_t portnum, uint8_t value)
 {
-    if (portnum==adlibport) {
+    if (portnum == adlibport) {
         adlibaddr = value;
         return;
     }
@@ -175,14 +175,14 @@ void tickadlib()
         if (adlibfreq (curchan) !=0) {
             if (adlibdidattack[curchan]) {
                 adlibenv[curchan] *= adlibdecay[curchan];
-            }
-            else {
+            } else {
                 adlibenv[curchan] *= adlibattack[curchan];
                 if (adlibenv[curchan]>=1.0) adlibdidattack[curchan] = 1;
             }
         }
     }
 }
+
 void initwavetable()
 {
     int i;

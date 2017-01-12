@@ -103,7 +103,7 @@ printf ("GNU General Public License for more details.\n");
 void parsecl (int argc, char *argv[])
 {
     uint32_t tempuint;
-    int i, abort = 0;
+    int i;
 
     if (argc<2) {
         printf ("Invoke Fake86 with the parameter -h for help and usage information.\n");
@@ -118,90 +118,58 @@ void parsecl (int argc, char *argv[])
     usefullscreen = 0;
     biosfile = PATH_DATAFILES "pcxtbios.bin";
     for (i=1; i<argc; i++) {
-        if (strcmpi (argv[i], "-h") ==0) showhelp ();
-        else if (strcmpi (argv[i], "-?") ==0) showhelp ();
-        else if (strcmpi (argv[i], "-help") ==0) showhelp ();
-        else if (strcmpi (argv[i], "-fd0") ==0) {
-            i++;
-            if (insertdisk (0, argv[i]) ) {
+        if (!strcmpi (argv[i], "-h")) showhelp ();
+        else if (!strcmpi (argv[i], "-?")) showhelp ();
+        else if (!strcmpi (argv[i], "-help")) showhelp ();
+        else if (!strcmpi (argv[i], "-fd0")) {
+            if (insertdisk (0, argv[++i]) ) {
                 printf ("ERROR: Unable to open image file %s\n", argv[i]);
             }
-        }
-        else if (strcmpi (argv[i], "-fd1") ==0) {
-            i++;
-            if (insertdisk (1, argv[i]) ) {
+        } else if (!strcmpi (argv[i], "-fd1")) {
+            if (insertdisk (1, argv[++i]) ) {
                 printf ("ERROR: Unable to open image file %s\n", argv[i]);
             }
-        }
-        else if (strcmpi (argv[i], "-hd0") ==0) {
-            i++;
-            if (insertdisk (0x80, argv[i]) ) {
+        } else if (!strcmpi (argv[i], "-hd0")) {
+            if (insertdisk (0x80, argv[++i]) ) {
                 printf ("ERROR: Unable to open image file %s\n", argv[i]);
             }
-        }
-        else if (strcmpi (argv[i], "-hd1") ==0) {
-            i++;
-            if (insertdisk (0x81, argv[i]) ) {
+        } else if (!strcmpi (argv[i], "-hd1")) {
+            if (insertdisk (0x81, argv[++i]) ) {
                 printf ("ERROR: Unable to open image file %s\n", argv[i]);
             }
-        }
-        else if (strcmpi (argv[i], "-net") ==0) {
-            i++;
-            if (strcmpi (argv[i], "list") ==0) ethif = 255;
+        } else if (!strcmpi (argv[i], "-net")) {
+            if (!strcmpi (argv[++i], "list")) ethif = 255;
             else ethif = atoi (argv[i]);
-        }
-        else if (strcmpi (argv[i], "-boot") ==0) {
-            i++;
-            if (strcmpi (argv[i], "rom") ==0) bootdrive = 255;
+        } else if (!strcmpi (argv[i], "-boot")) {
+            if (!strcmpi (argv[++i], "rom")) bootdrive = 255;
             else bootdrive = atoi (argv[i]);
-        }
-        else if (strcmpi (argv[i], "-ssource") ==0) {
+        } else if (!strcmpi (argv[i], "-ssource")) {
             i++;
             usessource = 1;
         }
-        else if (strcmpi (argv[i], "-latency") ==0) {
-            i++;
-            latency = atol (argv[i]);
+        else if (!strcmpi (argv[i], "-latency")) latency = atol (argv[++i]);
+        else if (!strcmpi (argv[i], "-samprate")) usesamplerate = atol (argv[++i]);
+        else if (!strcmpi (argv[i], "-bios")) biosfile = argv[++i];
+        else if (!strcmpi (argv[i], "-resw")) constantw = (uint16_t) atoi (argv[++i]);
+        else if (!strcmpi (argv[i], "-resh")) constanth = (uint16_t) atoi (argv[++i]);
+        else if (!strcmpi (argv[i], "-speed")) speed= (uint32_t) atol (argv[++i]);
+        else if (!strcmpi (argv[i], "-noscale")) noscale = 1;
+        else if (!strcmpi (argv[i], "-verbose")) verbose = 1;
+        else if (!strcmpi (argv[i], "-smooth")) nosmooth = 0;
+        else if (!strcmpi (argv[i], "-fps")) renderbenchmark = 1;
+        else if (!strcmpi (argv[i], "-nosound")) doaudio = 0;
+        else if (!strcmpi (argv[i], "-fullscreen")) usefullscreen = SDL_FULLSCREEN;
+        else if (!strcmpi (argv[i], "-delay")) framedelay = atol (argv[++i]);
+        else if (!strcmpi (argv[i], "-console")) useconsole = 1;
+        else if (!strcmpi (argv[i], "-slowsys")) slowsystem = 1;
+        else if (!strcmpi (argv[i], "-oprom")) {
+            tempuint = (uint32_t)strtol(argv[++i], NULL, 16);
+            loadrom (tempuint, argv[++i], 0);
+        } else {
+            printf ("Unrecognized parameter: %s\n", argv[i]);
+            exit (1);
         }
-        else if (strcmpi (argv[i], "-samprate") ==0) {
-            i++;
-            usesamplerate = atol (argv[i]);
-        }
-        else if (strcmpi (argv[i], "-bios") ==0) {
-            i++;
-            biosfile = argv[i];
-        }
-            else if (strcmpi (argv[i], "-resw") ==0) {
-                i++;
-                constantw = (uint16_t) atoi (argv[i]);
-            }
-            else if (strcmpi (argv[i], "-resh") ==0) {
-                i++;
-                constanth = (uint16_t) atoi (argv[i]);
-            }
-            else if (strcmpi (argv[i], "-speed") ==0) {
-                i++;
-                speed= (uint32_t) atol (argv[i]);
-            }
-            else if (strcmpi (argv[i], "-noscale") ==0) noscale = 1;
-            else if (strcmpi (argv[i], "-verbose") ==0) verbose = 1;
-            else if (strcmpi (argv[i], "-smooth") ==0) nosmooth = 0;
-            else if (strcmpi (argv[i], "-fps") ==0) renderbenchmark = 1;
-            else if (strcmpi (argv[i], "-nosound") ==0) doaudio = 0;
-            else if (strcmpi (argv[i], "-fullscreen") ==0) usefullscreen = SDL_FULLSCREEN;
-            else if (strcmpi (argv[i], "-delay") ==0) framedelay = atol (argv[++i]);
-            else if (strcmpi (argv[i], "-console") ==0) useconsole = 1;
-            else if (strcmpi (argv[i], "-slowsys") ==0) slowsystem = 1;
-            else if (strcmpi (argv[i], "-oprom") ==0) {
-                i++;
-                tempuint = (uint32_t)strtol(argv[i++], NULL, 16);
-                loadrom (tempuint, argv[i], 0);
-            }
-            else {
-                printf ("Unrecognized parameter: %s\n", argv[i]);
-                exit (1);
-            }
-            }
+    }
 
     if (bootdrive==254) {
         if (disk[0x80].inserted) bootdrive = 0x80;

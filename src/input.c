@@ -57,40 +57,28 @@ uint8_t translatescancode (uint16_t keyval) {
         return (0xF); //tab
     case 0x71:
         return (0x10);
- 
     case 0x77:
         return (0x11);
- 
     case 0x65:
         return (0x12);
- 
     case 0x72:
         return (0x13);
- 
     case 0x74:
         return (0x14);
- 
     case 0x79:
         return (0x15);
- 
     case 0x75:
         return (0x16);
- 
     case 0x69:
         return (0x17);
- 
     case 0x6F:
         return (0x18);
- 
     case 0x70:
         return (0x19);
- 
     case 0x5B:
         return (0x1A);
- 
     case 0x5D:
         return (0x1B);
- 
     case 0xD:
     case 0x10F:
         return (0x1C); //enter
@@ -99,75 +87,52 @@ uint8_t translatescancode (uint16_t keyval) {
         return (0x1D); //ctrl
     case 0x61:
         return (0x1E);
- 
     case 0x73:
         return (0x1F);
- 
     case 0x64:
         return (0x20);
- 
     case 0x66:
         return (0x21);
- 
     case 0x67:
         return (0x22);
- 
     case 0x68:
         return (0x23);
- 
     case 0x6A:
         return (0x24);
- 
     case 0x6B:
         return (0x25);
- 
     case 0x6C:
         return (0x26);
- 
     case 0x3B:
         return (0x27);
- 
     case 0x27:
         return (0x28);
- 
     case 0x60:
         return (0x29);
- 
     case 0x130:
         return (0x2A); //left shift
     case 0x5C:
         return (0x2B);
- 
     case 0x7A:
         return (0x2C);
- 
     case 0x78:
         return (0x2D);
- 
     case 0x63:
         return (0x2E);
- 
     case 0x76:
         return (0x2F);
- 
     case 0x62:
         return (0x30);
- 
     case 0x6E:
         return (0x31);
- 
     case 0x6D:
         return (0x32);
- 
     case 0x2C:
         return (0x33);
- 
     case 0x2E:
         return (0x34);
- 
     case 0x2F:
         return (0x35);
- 
     case 0x12F:
         return (0x36); //right shift
     case 0x13C:
@@ -247,8 +212,7 @@ void mousegrabtoggle()
         SDL_WM_GrabInput (usegrabmode);
         SDL_ShowCursor (SDL_ENABLE);
         setwindowtitle ("");
-    }
-    else {
+    } else {
         usegrabmode = SDL_GRAB_ON;
         SDL_WM_GrabInput (usegrabmode);
         SDL_ShowCursor (SDL_DISABLE);
@@ -265,7 +229,7 @@ void handleinput()
     uint8_t tempbuttons;
     if (SDL_PollEvent (&event) ) {
         switch (event.type) {
-            case SDL_KEYDOWN:
+        case SDL_KEYDOWN:
             portram[0x60] = translatescancode (event.key.keysym.sym);
             portram[0x64] |= 2;
             doirq (1);
@@ -286,13 +250,13 @@ void handleinput()
                 break;
             }
             break;
-            case SDL_KEYUP:
+        case SDL_KEYUP:
             portram[0x60] = translatescancode (event.key.keysym.sym) | 0x80;
             portram[0x64] |= 2;
             doirq (1);
             keydown[translatescancode (event.key.keysym.sym) ] = 0;
             break;
-            case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONDOWN:
             if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF) {
                 mousegrabtoggle();
                 break;
@@ -303,7 +267,7 @@ void handleinput()
             if (tempbuttons & 4) buttons |= 1;
             sermouseevent (buttons, 0, 0);
             break;
-            case SDL_MOUSEBUTTONUP:
+        case SDL_MOUSEBUTTONUP:
             if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF) break;
             tempbuttons = SDL_GetMouseState (NULL, NULL);
             if (tempbuttons & 1) buttons = 2;
@@ -311,7 +275,7 @@ void handleinput()
             if (tempbuttons & 4) buttons |= 1;
             sermouseevent (buttons, 0, 0);
             break;
-            case SDL_MOUSEMOTION:
+        case SDL_MOUSEMOTION:
             if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF) break;
             SDL_GetRelativeMouseState (&mx, &my);
             sermouseevent (buttons, (int8_t) mx, (int8_t) my);

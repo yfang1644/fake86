@@ -21,6 +21,9 @@
 
 #include <stdint.h>
 
+#define ADLIBPORT   (0x388)
+#define PARPORT     (0x378)
+
 void portout (uint16_t portnum, uint8_t value);
 
 uint8_t portin (uint16_t portnum);
@@ -29,12 +32,12 @@ void portout16 (uint16_t portnum, uint16_t value);
 
 uint16_t portin16 (uint16_t portnum);
 
-void set_port_write_redirector (uint16_t startport, uint16_t endport, void *callback);
+void set_port_write_redirector (uint16_t start, uint16_t end, void *callback);
 
-void set_port_read_redirector (uint16_t startport, uint16_t endport, void *callback);
+void set_port_read_redirector (uint16_t start, uint16_t end, void *callback);
 
-void set_port_write_redirector_16 (uint16_t startport, uint16_t endport, void *callback);
+void set_port_write_redirector_16 (uint16_t start, uint16_t end, void *callback);
 
-void set_port_read_redirector_16 (uint16_t startport, uint16_t endport, void *callback);
+void set_port_read_redirector_16 (uint16_t start, uint16_t end, void *callback);
 
 #endif //_PORTS_H

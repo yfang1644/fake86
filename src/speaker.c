@@ -36,8 +36,7 @@ int16_t speakergensample(uint64_t samplerate)
     if (speakerfullstep < 2) speakerfullstep = 2;
     if (speakercurstep < speakerfullstep/2) {
         speakervalue = 32;
-    }
-    else {
+    } else {
         speakervalue = -32;
     }
     speakercurstep = (speakercurstep + 1) % speakerfullstep;

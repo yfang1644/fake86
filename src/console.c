@@ -23,6 +23,7 @@
 #include <SDL/SDL.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 
 #ifdef _WIN32
@@ -33,7 +34,6 @@
 #endif
 
 uint8_t inputline[1024];
-uint16_t inputptr = 0;
 extern uint8_t running;
 
 extern uint8_t insertdisk (uint8_t drivenum, char *filename);
@@ -42,27 +42,26 @@ extern void ejectdisk (uint8_t drivenum);
 void waitforcmd (uint8_t *dst, uint16_t maxlen)
 {
 #ifdef _WIN32
-    uint16_t inputptr;
+    uint16_t inputptr = 0;
     uint8_t cc;
 
-    inputptr = 0;
     maxlen -= 2;
     inputline[0] = 0;
     while (running) {
         if (_kbhit () ) {
             cc = (uint8_t) _getch ();
             switch (cc) {
-                case 0:
-                case 9:
-                case 10:
+            case 0:
+            case 9:
+            case 10:
                 break;
-                case 8: //backspace
+            case 8: //backspace
                 if (inputptr > 0) {
                     printf ("%c %c", 8, 8);
                     inputline[--inputptr] = 0;
                 }
                 break;
-                case 13: //enter
+            case 13: //enter
                 printf ("\n");
                 return;
                 default:
@@ -84,7 +83,7 @@ void waitforcmd (uint8_t *dst, uint16_t maxlen)
             break;
         }
     }
-#endif   // _WIN32
+#endif  //_WIN32
 }
 
 void consolehelp ()
@@ -101,8 +100,8 @@ void consolehelp ()
 
 #ifdef _WIN32
 void runconsole (void *dummy)
-    #else
-    void *runconsole (void *dummy)
+#else
+void *runconsole (void *dummy)
 #endif
 {
     printf ("\nFake86 management console\n");

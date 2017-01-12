@@ -37,7 +37,6 @@ extern uint8_t RAM[0x100000];
 extern uint8_t verbose;
 uint8_t ethif, net_enabled = 0;
 uint8_t dopktrecv = 0;
-uint16_t handpkt;
 
 pcap_if_t *alldevs;
 pcap_if_t *d;

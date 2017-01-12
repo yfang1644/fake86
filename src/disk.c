@@ -72,7 +72,8 @@ uint8_t insertdisk (uint8_t drivenum, char *filename)
     return (0);
 }
 
-void ejectdisk (uint8_t drivenum) {
+void ejectdisk (uint8_t drivenum)
+{
     disk[drivenum].inserted = 0;
     if (disk[drivenum].diskfile != NULL) fclose (disk[drivenum].diskfile);
 }

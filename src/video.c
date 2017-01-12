@@ -37,20 +37,18 @@
 extern SDL_Surface *screen;
 extern uint8_t verbose;
 extern union _bytewordregs_ regs;
-extern uint8_t RAM[0x100000], readonly[0x100000];
-extern uint8_t portram[0x10000];
+extern uint8_t RAM[0x100000];   // 1MB
+extern uint8_t portram[0x10000];    // 64KB
 extern uint16_t segregs[4];
 
 extern uint8_t read86 (uint32_t addr32);
-extern uint8_t write86 (uint32_t addr32, uint8_t value);
 extern uint8_t scrmodechange;
 
 uint8_t VRAM[262144], vidmode, cgabg, blankattr, vidgfxmode, vidcolor;
 uint16_t cursx, cursy, cols = 80, rows = 25, vgapage, cursorposition, cursorvisible;
 uint8_t updatedscreen, clocksafe, port3da, port6;
 uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
-uint32_t videobase= 0xB8000, textbase = 0xB8000, x, y;
-uint8_t fontcga[4096];
+uint32_t videobase= 0xB8000, textbase = 0xB8000;
 uint32_t palettecga[16] = {
 	rgb (0, 0, 0),
 	rgb (0, 0, 0xAA),
@@ -337,9 +335,12 @@ uint32_t tempRGB;
 uint16_t oldw, oldh; //used when restoring screen mode
 
 extern uint32_t nw, nh;
+
 void vidinterrupt()
 {
     uint32_t tempcalc, memloc, n;
+    uint16_t *p, val;
+
     updatedscreen = 1;
     switch (regs.byteregs[regah]) {
         //what video interrupt function?
@@ -357,10 +358,11 @@ void vidinterrupt()
             vidcolor = 0;
             vidgfxmode = 0;
             blankattr = 7;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = val;
+
             break;
         case 1: //40x25 color text
             videobase = textbase;
@@ -369,11 +371,11 @@ void vidinterrupt()
             vidcolor = 1;
             vidgfxmode = 0;
             blankattr = 7;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = val;
+            portram[0x3D8] &= 0xFE;
             break;
         case 2: //80x25 mono text
             videobase = textbase;
@@ -382,11 +384,11 @@ void vidinterrupt()
             vidcolor = 1;
             vidgfxmode = 0;
             blankattr = 7;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = val;
+            portram[0x3D8] &= 0xFE;
             break;
         case 3: //80x25 color text
             videobase = textbase;
@@ -395,11 +397,11 @@ void vidinterrupt()
             vidcolor = 1;
             vidgfxmode = 0;
             blankattr = 7;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = val;
+            portram[0x3D8] &= 0xFE;
             break;
         case 4:
         case 5: //80x25 color text
@@ -409,10 +411,10 @@ void vidinterrupt()
             vidcolor = 1;
             vidgfxmode = 1;
             blankattr = 7;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = val;
             if (regs.byteregs[regal]==4) portram[0x3D9] = 48;
             else portram[0x3D9] = 0;
             break;
@@ -423,11 +425,11 @@ void vidinterrupt()
             vidcolor = 0;
             vidgfxmode = 1;
             blankattr = 7;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = val;
+            portram[0x3D8] &= 0xFE;
             break;
         case 127:
             videobase = 0xB8000;
@@ -435,10 +437,10 @@ void vidinterrupt()
             rows = 25;
             vidcolor = 0;
             vidgfxmode = 1;
-            for (tempcalc = videobase; tempcalc<videobase+16384; tempcalc++) {
-                RAM[tempcalc] = 0;
-            }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            p = (uint16_t *)&RAM[videobase];
+            for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                *p++ = 0;
+            portram[0x3D8] &= 0xFE;
             break;
         case 0x9: //320x200 16-color
             videobase = 0xB8000;
@@ -447,11 +449,13 @@ void vidinterrupt()
             vidcolor = 1;
             vidgfxmode = 1;
             blankattr = 0;
-            if ( (regs.byteregs[regal]&0x80) ==0) for (tempcalc = videobase; tempcalc<videobase+65535; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
+            if ( (regs.byteregs[regal]&0x80) ==0) {
+                p = (uint16_t *)&RAM[videobase];
+                val = (uint16_t)blankattr << 8;
+                for (tempcalc = 0; tempcalc<8192; tempcalc++)
+                    *p++ = val;
             }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            portram[0x3D8] &= 0xFE;
             break;
         case 0xD: //320x200 16-color
         case 0x12: //640x480 16-color
@@ -462,11 +466,11 @@ void vidinterrupt()
             vidcolor = 1;
             vidgfxmode = 1;
             blankattr = 0;
-            for (tempcalc = videobase; tempcalc<videobase+65535; tempcalc+=2) {
-                RAM[tempcalc] = 0;
-                RAM[tempcalc+1] = blankattr;
-            }
-            portram[0x3D8] = portram[0x3D8] & 0xFE;
+            p = (uint16_t *)&RAM[videobase];
+            val = (uint16_t)blankattr << 8;
+            for (tempcalc = 0; tempcalc<32768; tempcalc++)
+                *p++ = val;
+            portram[0x3D8] &= 0xFE;
             break;
         }
         vidmode = regs.byteregs[regal] & 0x7F;
@@ -645,26 +649,26 @@ uint8_t inVGA (uint16_t portnum)
         return (latchReadPal);
     case 0x3C9: //RGB data register
         switch (latchReadRGB++) {
-            #ifdef __BIG_ENDIAN__
-            case 0: //blue
+#ifdef __BIG_ENDIAN__
+        case 0: //blue
             return ( (palettevga[latchReadPal] >> 26) & 63);
-            case 1: //green
+        case 1: //green
             return ( (palettevga[latchReadPal] >> 18) & 63);
-            case 2: //red
+        case 2: //red
             latchReadRGB = 0;
             return ( (palettevga[latchReadPal++] >> 10) & 63);
-            #else
-            case 0: //blue
+#else
+        case 0: //blue
             return ( (palettevga[latchReadPal] >> 2) & 63);
-            case 1: //green
+        case 1: //green
             return ( (palettevga[latchReadPal] >> 10) & 63);
-            case 2: //red
+        case 2: //red
             latchReadRGB = 0;
             return ( (palettevga[latchReadPal++] >> 18) & 63);
-            #endif
-					}
-			case 0x3DA:
-				return (port3da);
+#endif  //__BIG_ENDIAN__
+        }
+        case 0x3DA:
+        return (port3da);
 		}
 	return (portram[portnum]); //this won't be reached, but without it the compiler gives a warning
 }
@@ -683,155 +687,85 @@ uint8_t inVGA (uint16_t portnum)
 	}\
 }
 
-uint8_t lastmode = 0, tempvalue;
+uint8_t lastmode = 0;
 void writeVGA (uint32_t addr32, uint8_t value)
 {
-	uint32_t planesize;
+	uint32_t planesize = 0x10000;
 	uint8_t curval, tempand, cnt;
+    int i;
+
 	updatedscreen = 1;
-	planesize = 0x10000;
 	//if (lastmode != VGA_GC[5] & 3) printf("write mode %u\n", VGA_GC[5] & 3);
     //lastmode = VGA_GC[5] & 3;
     switch (VGA_GC[5] & 3) {
         //get write mode
-        case 0:
+    case 0:
         shiftVGA (value);
-        if (VGA_SC[2] & 1) {
-            if (VGA_GC[1] & 1)
-            if (VGA_GC[0] & 1) curval = 255;
-            else curval = 0;
-            else curval = value;
-            logicVGA (curval, VGA_latch[0]);
-            curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[0]);
-            VRAM[addr32] = curval;
-        }
-        if (VGA_SC[2] & 2) {
-            if (VGA_GC[1] & 2)
-            if (VGA_GC[0] & 2) curval = 255;
-            else curval = 0;
-            else curval = value;
-            logicVGA (curval, VGA_latch[1]);
-            curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[1]);
-            VRAM[addr32+planesize] = curval;
-        }
-        if (VGA_SC[2] & 4) {
-            if (VGA_GC[1] & 4)
-            if (VGA_GC[0] & 4) curval = 255;
-            else curval = 0;
-            else curval = value;
-            logicVGA (curval, VGA_latch[2]);
-            curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[2]);
-            VRAM[addr32+planesize*2] = curval;
-        }
-        if (VGA_SC[2] & 8) {
-            if (VGA_GC[1] & 8)
-            if (VGA_GC[0] & 8) curval = 255;
-            else curval = 0;
-            else curval = value;
-            logicVGA (curval, VGA_latch[3]);
-            curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[3]);
-            VRAM[addr32+planesize*3] = curval;
+        for(i = 0; i < 4; i++) {
+            if (VGA_SC[2] & (1<<i)) {
+                if (VGA_GC[1] & (1<<i)) {
+                    if (VGA_GC[0] & (1<<i)) curval = 255;
+                    else curval = 0;
+                }
+                else curval = value;
+                logicVGA (curval, VGA_latch[i]);
+                curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[i]);
+                VRAM[addr32+planesize*i] = curval;
+            }
         }
         break;
-        case 1:
-        if (VGA_SC[2] & 1) VRAM[addr32] = VGA_latch[0];
-        if (VGA_SC[2] & 2) VRAM[addr32+planesize] = VGA_latch[1];
-        if (VGA_SC[2] & 4) VRAM[addr32+planesize*2] = VGA_latch[2];
-        if (VGA_SC[2] & 8) VRAM[addr32+planesize*3] = VGA_latch[3];
-        break;
-        case 2:
-        if (VGA_SC[2] & 1) {
-            if (VGA_GC[1] & 1)
-            if (value & 1) curval = 255;
-            else curval = 0;
-            else curval = value;
-            logicVGA (curval, VGA_latch[0]);
-            curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[0]);
-            VRAM[addr32] = curval;
+    case 1:
+        for(i = 0; i < 4; i++) {
+            if (VGA_SC[2] & (1<<i)) VRAM[addr32+planesize*i] = VGA_latch[i];
         }
-if (VGA_SC[2] & 2) {
-    if (VGA_GC[1] & 2)
-    if (value & 2) curval = 255;
-    else curval = 0;
-    else curval = value;
-    logicVGA (curval, VGA_latch[1]);
-    curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[1]);
-    VRAM[addr32+planesize] = curval;
-}
-if (VGA_SC[2] & 4) {
-    if (VGA_GC[1] & 4)
-    if (value & 4) curval = 255;
-    else curval = 0;
-    else curval = value;
-    logicVGA (curval, VGA_latch[2]);
-    curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[2]);
-    VRAM[addr32+planesize*2] = curval;
-}
-if (VGA_SC[2] & 8) {
-    if (VGA_GC[1] & 8)
-    if (value & 8) curval = 255;
-    else curval = 0;
-    else curval = value;
-    logicVGA (curval, VGA_latch[3]);
-    curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[3]);
-    VRAM[addr32+planesize*3] = curval;
-}
-break;
-            case 3:
-                tempand = value & VGA_GC[8];
-                shiftVGA (value);
-                if (VGA_SC[2] & 1) {
-                    if (VGA_GC[0] & 1) curval = 255;
+        break;
+    case 2:
+        for(i = 0; i < 4; i++) {
+            if (VGA_SC[2] & (1<<i)) {
+                if (VGA_GC[1] & (1<<i)) {
+                    if (value & (1<<i)) curval = 255;
                     else curval = 0;
-                    //logicVGA (curval, VGA_latch[0]);
-                    curval = (~tempand & curval) | (tempand & VGA_latch[0]);
-                    VRAM[addr32] = curval;
                 }
-                if (VGA_SC[2] & 2) {
-                    if (VGA_GC[0] & 2) curval = 255;
-                    else curval = 0;
-                    //logicVGA (curval, VGA_latch[1]);
-                    curval = (~tempand & curval) | (tempand & VGA_latch[1]);
-                    VRAM[addr32+planesize] = curval;
-                }
-                if (VGA_SC[2] & 4) {
-                    if (VGA_GC[0] & 4) curval = 255;
-                    else curval = 0;
-                    //logicVGA (curval, VGA_latch[2]);
-                    curval = (~tempand & curval) | (tempand & VGA_latch[2]);
-                    VRAM[addr32+planesize*2] = curval;
-                }
-                if (VGA_SC[2] & 8) {
-                    if (VGA_GC[0] & 8) curval = 255;
-                    else curval = 0;
-                    //logicVGA (curval, VGA_latch[3]);
-                    curval = (~tempand & curval) | (tempand & VGA_latch[3]);
-                    VRAM[addr32+planesize*3] = curval;
-					}
-				break;
-		}
+                else curval = value;
+                logicVGA (curval, VGA_latch[i]);
+                curval = (~VGA_GC[8] & curval) | (VGA_GC[8] & VGA_latch[i]);
+                VRAM[addr32+planesize*i] = curval;
+            }
+        }
+        break;
+    case 3:
+        tempand = value & VGA_GC[8];
+        shiftVGA (value);
+        for(i = 0; i < 4; i++) {
+            if (VGA_SC[2] & (1<<i)) {
+                if (VGA_GC[0] & (1<<i)) curval = 255;
+                else curval = 0;
+                //logicVGA (curval, VGA_latch[i]);
+                curval = (~tempand & curval) | (tempand & VGA_latch[i]);
+                VRAM[addr32+planesize*i] = curval;
+            }
+        }
+        break;
+    }
 }
 
-uint8_t readmode;
-uint32_t readmap;
 uint8_t readVGA (uint32_t addr32)
 {
-	uint32_t planesize;
-	planesize = 0x10000;
+	uint32_t planesize = 0x10000;
+    int i;
+    for (i = 0; i < 4; i++) {
+	    VGA_latch[i] = VRAM[addr32+planesize*i];
+    }
 
-	VGA_latch[0] = VRAM[addr32];
-	VGA_latch[1] = VRAM[addr32+planesize];
-	VGA_latch[2] = VRAM[addr32+planesize*2];
-	VGA_latch[3] = VRAM[addr32+planesize*3];
-	if (VGA_SC[2] & 1) return (VRAM[addr32]);
-	if (VGA_SC[2] & 2) return (VRAM[addr32+planesize]);
-	if (VGA_SC[2] & 4) return (VRAM[addr32+planesize*2]);
-	if (VGA_SC[2] & 8) return (VRAM[addr32+planesize*3]);
-	return (0); //this won't be reached, but without it some compilers give a warning
+    for (i = 0; i < 4; i++) {
+        if (VGA_SC[2] & (1<<i)) return (VRAM[addr32+planesize*i]);
+    }
+
+    return (0); //this won't be reached, but without it some compilers give a warning
 }
 
 void initVideoPorts()
 {
-	set_port_write_redirector (0x3B0, 0x3DA, &outVGA);
-	set_port_read_redirector (0x3B0, 0x3DA, &inVGA);
+    set_port_write_redirector (0x3B0, 0x3DA, &outVGA);
+    set_port_read_redirector (0x3B0, 0x3DA, &inVGA);
 }

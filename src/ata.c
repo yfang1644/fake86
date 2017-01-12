@@ -33,9 +33,6 @@ uint8_t idATA[512];
 #define ATA_STATUS_READY 0x40
 #define ATA_STATUS_BUSY  0x80
 
-#define flip16(x) ((x&255) | (x>>8))
-#define flip32(x) ((x>>24) | (((x>>16)&255)<<8) | (((x>>8)&255)<<16) | ((x&255)<<24))
-
 uint8_t statusreg = 0, drivesel = 0, databuf[512];
 uint16_t dataptr = 512;
 
@@ -123,4 +120,4 @@ uint8_t inATA (uint16_t portnum)
     }
     return (0);
 }
-#endif
+#endif  //DISK_CONTROLLER_ATA

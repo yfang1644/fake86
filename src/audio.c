@@ -30,7 +30,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <memory.h>
-#include "blaster.h"
 #include "audio.h"
 
 extern SDL_Surface *screen;
@@ -42,7 +41,7 @@ int8_t audbuf[96000];
 int32_t audbufptr, usebuffersize, usesamplerate = AUDIO_DEFAULT_SAMPLE_RATE, latency = AUDIO_DEFAULT_LATENCY;
 uint8_t speakerenabled = 0;
 
-extern uint64_t gensamplerate, sampleticks, hostfreq;
+extern uint64_t gensamplerate;
 extern int16_t adlibgensample();
 extern int16_t speakergensample(uint64_t samplerate);
 extern int16_t getssourcebyte();
@@ -74,16 +73,6 @@ void create_output_wav (uint8_t *filename)
     wav_hdr.Subchunk2Size = 0;
     //fwrite((void *)&wav_hdr, 1, sizeof(wav_hdr), wav_file);
 }
-
-uint64_t doublesamplecount, cursampnum = 0, sampcount = 0, framecount = 0;
-uint8_t bmpfilename[256];
-
-void savepic()
-{
-    SDL_SaveBMP (screen, &bmpfilename[0]);
-}
-
-int8_t samps[2400];
 
 uint8_t audiobufferfilled()
 {
@@ -121,7 +110,6 @@ void initaudio()
     else if (latency > 1000) latency = 1000;
     audbufptr = usebuffersize = (usesamplerate / 1000) * latency;
     gensamplerate = usesamplerate;
-    doublesamplecount = (uint32_t) ( (double) usesamplerate * (double) 0.01);
 
     wanted.freq = usesamplerate;
     wanted.format = AUDIO_U8;

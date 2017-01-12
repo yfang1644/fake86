@@ -32,9 +32,9 @@ struct sermouse_s sermouse;
 
 void bufsermousedata (uint8_t value)
 {
-	if (sermouse.bufptr == 16) return;
-	if (sermouse.bufptr == 0 ) doirq (4);
-	sermouse.buf[sermouse.bufptr++] = value;
+    if (sermouse.bufptr == 16) return;
+    if (sermouse.bufptr == 0 ) doirq (4);
+    sermouse.buf[sermouse.bufptr++] = value;
 }
 
 void outsermouse (uint16_t portnum, uint8_t value)
@@ -66,7 +66,7 @@ uint8_t insermouse (uint16_t portnum)
     //printf("[DEBUG] Serial mouse, port %X in\n", portnum);
     portnum &= 7;
     switch (portnum) {
-        case 0: //data receive
+    case 0: //data receive
         temp = sermouse.buf[0];
         memmove (sermouse.buf, &sermouse.buf[1], 15);
         sermouse.bufptr--;
@@ -74,7 +74,7 @@ uint8_t insermouse (uint16_t portnum)
         if (sermouse.bufptr > 0) doirq (4);
         sermouse.reg[4] = ~sermouse.reg[4] & 1;
         return (temp);
-        case 5: //line status register (read-only)
+    case 5: //line status register (read-only)
         if (sermouse.bufptr > 0) temp = 1;
         else temp = 0;
         return (0x1);

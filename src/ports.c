@@ -27,7 +27,6 @@
 
 extern uint8_t portram[0x10000];
 extern uint8_t speakerenabled;
-extern uint8_t keyboardwaitack;
 
 void (*do_callback_write) (uint16_t portnum, uint8_t value) = NULL;
 uint8_t (*do_callback_read) (uint16_t portnum) = NULL;

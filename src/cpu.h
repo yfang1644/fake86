@@ -57,33 +57,33 @@
 #endif
 
 union _bytewordregs_ {
-	uint16_t wordregs[8];
-	uint8_t byteregs[8];
+    uint16_t wordregs[8];  //AX,CX,DX,BX,SP,BP,SI,DI
+    uint8_t byteregs[8];   //AL,AH,CL,CH,DL,DH,BL,BH
 };
 
 #ifdef CPU_ADDR_MODE_CACHE
 struct addrmodecache_s {
-	uint16_t exitcs;
-	uint16_t exitip;
-	uint16_t disp16;
-	uint32_t len;
-	uint8_t mode;
-	uint8_t reg;
-	uint8_t rm;
-	uint8_t forcess;
-	uint8_t valid;
+    uint16_t exitcs;
+    uint16_t exitip;
+    uint16_t disp16;
+    uint32_t len;
+    uint8_t mode;
+    uint8_t reg;
+    uint8_t rm;
+    uint8_t forcess;
+    uint8_t valid;
 };
 #endif
 
-#define StepIP(x)	ip += x
-#define getmem8(x, y)	read86(segbase(x) + y)
-#define getmem16(x, y)	readw86(segbase(x) + y)
-#define putmem8(x, y, z)	write86(segbase(x) + y, z)
-#define putmem16(x, y, z)	writew86(segbase(x) + y, z)
-#define signext(value)	(int16_t)(int8_t)(value)
-#define signext32(value)	(int32_t)(int16_t)(value)
-#define getreg16(regid)	regs.wordregs[regid]
-#define getreg8(regid)	regs.byteregs[byteregtable[regid]]
+#define StepIP(x)                   ip += x
+#define getmem8(x, y)               read86(segbase(x) + y)
+#define getmem16(x, y)              readw86(segbase(x) + y)
+#define putmem8(x, y, z)            write86(segbase(x) + y, z)
+#define putmem16(x, y, z)           writew86(segbase(x) + y, z)
+#define signext(value)              (int16_t)(int8_t)(value)
+#define signext32(value)            (int32_t)(int16_t)(value)
+#define getreg16(regid)             regs.wordregs[regid]
+#define getreg8(regid)              regs.byteregs[byteregtable[regid]]
 #define putreg16(regid, writeval)	regs.wordregs[regid] = writeval
 #define putreg8(regid, writeval)	regs.byteregs[byteregtable[regid]] = writeval
 #define getsegreg(regid)	segregs[regid]

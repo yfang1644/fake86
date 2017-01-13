@@ -38,7 +38,7 @@ extern uint8_t running;
 extern uint8_t insertdisk (uint8_t drivenum, char *filename);
 extern void ejectdisk (uint8_t drivenum);
 
-void waitforcmd (uint8_t *dst, uint16_t maxlen)
+void waitforcmd (int8_t *dst, uint16_t maxlen)
 {
 #ifdef _WIN32
     uint16_t inputptr = 0;
@@ -103,7 +103,7 @@ void runconsole (void *dummy)
 void *runconsole (void *dummy)
 #endif
 {
-    uint8_t inputline[1024];
+    int8_t inputline[1024];
 
     printf ("\nFake86 management console\n");
     printf ("Type \"help\" for a summary of commands.\n");
@@ -135,4 +135,9 @@ void *runconsole (void *dummy)
             running = 0;
         } else printf("Invalid command was entered.\n");
     }
+#ifdef  _WIN32
+    return;
+#else
+    return NULL;
+#endif
 }

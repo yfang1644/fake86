@@ -199,7 +199,7 @@ uint8_t translatescancode (uint16_t keyval) {
 }
 
 extern void sermouseevent (uint8_t buttons, int8_t xrel, int8_t yrel);
-extern void setwindowtitle (uint8_t *extra);
+extern void setwindowtitle (int8_t *extra);
 
 void mousegrabtoggle()
 {

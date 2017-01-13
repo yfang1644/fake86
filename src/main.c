@@ -62,7 +62,7 @@ extern uint64_t totalexec, totalframes;
 uint8_t *biosfile = NULL, verbose = 0, cgaonly = 0, useconsole = 0;
 uint32_t speed = 0;
 
-uint32_t loadbinary (uint32_t addr32, uint8_t *filename, uint8_t roflag)
+uint32_t loadbinary (uint32_t addr32, int8_t *filename, uint8_t roflag)
 {
     FILE *binfile = NULL;
     uint32_t readsize;
@@ -82,7 +82,7 @@ uint32_t loadbinary (uint32_t addr32, uint8_t *filename, uint8_t roflag)
     return (readsize);
 }
 
-uint32_t loadrom (uint32_t addr32, uint8_t *filename, uint8_t failure_fatal)
+uint32_t loadrom (uint32_t addr32, int8_t *filename, uint8_t failure_fatal)
 {
     uint32_t readsize;
     readsize = loadbinary (addr32, filename, 1);
@@ -98,7 +98,7 @@ uint32_t loadrom (uint32_t addr32, uint8_t *filename, uint8_t failure_fatal)
     }
 }
 
-uint32_t loadbios (uint8_t *filename)
+uint32_t loadbios (int8_t *filename)
 {
     FILE *binfile = NULL;
     uint32_t readsize;

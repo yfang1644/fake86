@@ -52,7 +52,7 @@ uint32_t framedelay = 20;
 uint8_t scrmodechange = 0, noscale = 0, nosmooth = 1, renderbenchmark = 0, doaudio = 1;
 char windowtitle[128];
 
-void setwindowtitle (uint8_t *extra)
+void setwindowtitle (int8_t *extra)
 {
     char temptext[128];
     sprintf (temptext, "%s%s", windowtitle, extra);
@@ -251,7 +251,7 @@ difference between games being smooth and playable, and being jerky on my old
 void doubleblit (SDL_Surface *target)
 {
     uint32_t srcx, srcy, dstx, dsty, curcolor;
-    int32_t ofs, startofs;
+    int32_t ofs;
     uint8_t *pixelrgb;
 
     if (SDL_MUSTLOCK (target) )
@@ -260,7 +260,7 @@ void doubleblit (SDL_Surface *target)
 
     for (dsty=0; dsty<(uint32_t)target->h; dsty += 2) {
         srcy = (uint32_t) (dsty >> 1);
-        startofs = ofs = dsty*target->w;
+        ofs = dsty*target->w;
         for (dstx=0; dstx<(uint32_t)target->w; dstx += 2) {
             srcx = (uint32_t) (dstx >> 1);
             pixelrgb = (uint8_t *) &prestretch[srcy][srcx];

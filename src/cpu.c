@@ -36,7 +36,7 @@ uint8_t	RAM[0x100000], readonly[0x100000]; //1MB
 uint8_t	portram[0x10000];  // 64KB
 uint8_t	opcode, segoverride, reptype, bootdrive = 0, hdcount = 0, hltstate = 0;
 uint16_t segregs[4], savecs, saveip, ip, useseg;
-uint8_t	cf, pf, af, zf, sf, tf, ifl, df, of, mode, reg, rm;
+uint16_t cf, pf, af, zf, sf, tf, ifl, df, of, mode, reg, rm;
 uint16_t oper1, oper2, res16, disp16, stacksize, frametemp;
 uint8_t	oper1b, oper2b, res8, disp8, nestlev;
 uint32_t ea;
@@ -54,25 +54,6 @@ extern uint8_t vidmode, verbose;
 extern void vidinterrupt();
 
 extern uint8_t readVGA (uint32_t addr32);
-
-#define makeflagsword() \
-	( \
-	  2 | (uint16_t) cf | ((uint16_t) pf << 2) | ((uint16_t) af << 4) | ((uint16_t) zf << 6) | ((uint16_t) sf << 7) | \
-	  ((uint16_t) tf << 8) | ((uint16_t) ifl << 9) | ((uint16_t) df << 10) | ((uint16_t) of << 11) \
-	)
-
-#define decodeflagsword(x) { \
-	temp16 = x; \
-	cf = temp16 & 1; \
-	pf = (temp16 >> 2) & 1; \
-	af = (temp16 >> 4) & 1; \
-	zf = (temp16 >> 6) & 1; \
-	sf = (temp16 >> 7) & 1; \
-	tf = (temp16 >> 8) & 1; \
-	ifl = (temp16 >> 9) & 1; \
-	df = (temp16 >> 10) & 1; \
-	of = (temp16 >> 11) & 1; \
-}
 
 extern void	writeVGA (uint32_t addr32, uint8_t value);
 
@@ -136,14 +117,15 @@ uint16_t readw86 (uint32_t addr32)
     return ( (uint16_t) read86 (addr32) | (uint16_t) (read86 (addr32 + 1) << 8) );
 }
 
-uint8_t parity(uint8_t value)
+uint16_t parity(uint8_t value)
 {
     int i;
-    uint8_t p = 1;
+    uint16_t p = 1;
     for (i = 0; i < 8; i++) {
         p ^= (value & 1);
         value >>= 1;
     }
+    return p;
 }
 
 void flag_szp8 (uint8_t value)
@@ -358,7 +340,6 @@ void intcall86 (uint8_t intnum)
 {
     static uint16_t lastint10ax;
     uint16_t oldregax;
-    uint8_t didintr = 1;
 
     if (intnum == 0x19) didbootstrap = 1;
 
@@ -468,7 +449,7 @@ void op_idiv8 (uint16_t valdiv, uint8_t divisor)
 
     s1 = valdiv;
     s2 = divisor;
-    sign = ( ( (s1 ^ s2) & 0x8000) != 0);
+    sign = (s1 ^ s2) & 0x8000;
     s1 = (s1 < 0x8000) ? s1 : ( (~s1 + 1) & 0xffff);
     s2 = (s2 < 0x8000) ? s2 : ( (~s2 + 1) & 0xffff);
     d1 = s1 / s2;
@@ -519,7 +500,7 @@ void op_idiv16 (uint32_t valdiv, uint16_t divisor)
     s1 = valdiv;
     s2 = divisor;
     s2 = (s2 & 0x8000) ? (s2 | 0xffff0000) : s2;
-    sign = ( ( (s1 ^ s2) & 0x80000000) != 0);
+    sign = (s1 ^ s2) & 0x80000000;
     s1 = (s1 < 0x80000000) ? s1 : ( (~s1 + 1) & 0xffffffff);
     s2 = (s2 < 0x80000000) ? s2 : ( (~s2 + 1) & 0xffffffff);
     d1 = s1 / s2;
@@ -989,7 +970,7 @@ void op_grp3_16()
         temp1 = signext32(regs.wordregs[regax]);
         temp2 = signext32(oper1);
 
-        temp3 = temp1 * temp2;
+        temp3 = (int32_t)temp1 * (int32_t)temp2;
         regs.wordregs[regax] = temp3 & 0xFFFF;	/* into register ax */
         regs.wordregs[regdx] = temp3 >> 16;	/* into register dx */
         if (regs.wordregs[regdx]) {

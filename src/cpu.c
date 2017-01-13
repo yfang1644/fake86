@@ -735,8 +735,8 @@ uint8_t op_grp2_8 (uint8_t cnt)
         break;
 
         case 5: /* SHR r/m8 */
-        if ( (cnt == 1) && (s & 0x80) ) {
-            of = 1;
+        if ( cnt == 1 ) {
+            of = (s >> 7) & 1;
         } else {
             of = 0;
         }
@@ -780,9 +780,7 @@ uint16_t op_grp2_16 (uint8_t cnt)
         case 0: /* ROL r/m8 */
         for (shift = cnt; shift--;) {
             cf = (s >> 15) & 1;
-
-            s = s << 1;
-            s = s | cf;
+            s = (s << 1) | cf;
         }
 
         if (cnt == 1) {
@@ -844,8 +842,8 @@ uint16_t op_grp2_16 (uint8_t cnt)
 		break;
 
         case 5: /* SHR r/m8 */
-        if ( (cnt == 1) && (s & 0x8000) ) {
-            of = 1;
+        if ( cnt == 1 ) {
+            of = (s >> 15) & 1;
         } else {
             of = 0;
         }
@@ -892,7 +890,11 @@ void op_grp3_8()
         case 3: /* NEG */
         res8 = (~oper1b) + 1;
         flag_sub8 (0, oper1b, 0);
-        cf = (res8 != 0);
+        if( res8 ) {
+            cf = 1;
+        } else {
+            cf = 0;
+        }
         break;
 
         case 4: /* MUL */
@@ -959,7 +961,11 @@ void op_grp3_16()
         case 3: /* NEG */
         res16 = (~oper1) + 1;
         flag_sub16 (0, oper1, 0);
-        cf = (res16 != 0);
+        if(res16 ) {
+            cf = 1;
+        } else {
+            cf = 0;
+        }
         break;
 
         case 4: /* MUL */
@@ -1594,13 +1600,13 @@ void exec86 (uint32_t execloops)
             }
 
             if ( (regs.byteregs[regal]  > 0x9F) || (cf == 1) ) {
-                regs.byteregs[regal] = regs.byteregs[regal] + 0x60;
+                regs.byteregs[regal] += 0x60;
                 cf = 1;
             } else {
                 //cf = 0;
             }
 
-            regs.byteregs[regal] = regs.byteregs[regal] & 0xFF;
+            regs.byteregs[regal] &= 0xFF;
             flag_szp8 (regs.byteregs[regal]);
             break;
 
@@ -1956,13 +1962,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi]++;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -1983,13 +1987,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi] += 2;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2010,13 +2012,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi]++;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2037,13 +2037,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi] +=  2;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2434,13 +2432,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi]++;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2461,13 +2457,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi] += 2;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2572,13 +2566,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi]++;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2597,13 +2589,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi] += 2;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2622,13 +2612,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regsi]++;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 
@@ -2647,13 +2635,11 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regsi] += 2;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
+            if (reptype) {
+                regs.wordregs[regcx]--;
+            } else {
                 break;
             }
 

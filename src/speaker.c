@@ -24,7 +24,7 @@
 #include "i8253.h"
 #include "mutex.h"
 
-extern struct i8253_s i8253;
+extern struct i8253_s i8253[];
 
 int16_t speakergensample(uint64_t samplerate)
 {
@@ -32,7 +32,7 @@ int16_t speakergensample(uint64_t samplerate)
     uint64_t speakerfullstep;
     static uint64_t speakercurstep = 0;
 
-    speakerfullstep = (uint64_t) ( (float) samplerate / (float) i8253.chanfreq[2]);
+    speakerfullstep = (uint64_t) ( (float) samplerate / (float) i8253[2].chanfreq);
     if (speakerfullstep < 2) speakerfullstep = 2;
     if (speakercurstep < speakerfullstep/2) {
         speakervalue = 32;

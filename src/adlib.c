@@ -73,8 +73,7 @@ void outadlib (uint16_t portnum, uint8_t value)
         portnum &= 15;
         adlibattack[portnum] = attacktable[15- (value>>4) ]*1.006;
         adlibdecay[portnum] = decaytable[value&15];
-    }
-    else if ( (portnum >= 0xA0) && (portnum <= 0xB8) ) {
+    } else if ( (portnum >= 0xA0) && (portnum <= 0xB8) ) {
         //octave, freq, key on
         portnum &= 15;
         if (!adlibch[portnum].keyon && ( (adlibregmem[0xB0+portnum]>>5) &1) ) {
@@ -85,8 +84,7 @@ void outadlib (uint16_t portnum, uint8_t value)
         adlibch[portnum].convfreq = ( (double) adlibch[portnum].freq * 0.7626459);
         adlibch[portnum].keyon = (adlibregmem[0xB0+portnum]>>5) &1;
         adlibch[portnum].octave = (adlibregmem[0xB0+portnum]>>2) &7;
-    }
-    else if ( (portnum >= 0xE0) && (portnum <= 0xF5) ) {
+    } else if ( (portnum >= 0xE0) && (portnum <= 0xF5) ) {
         //waveform select
         portnum &= 15;
         if (portnum<9) adlibch[portnum].wavesel = value&3;
@@ -97,7 +95,7 @@ uint8_t inadlib (uint16_t portnum)
 {
     if (!adlibregmem[4]) adlibstatus = 0;
     else adlibstatus = 0x80;
-    adlibstatus = adlibstatus + (adlibregmem[4]&1) *0x40 + (adlibregmem[4]&2) *0x10;
+    adlibstatus += (adlibregmem[4]&1) *0x40 + (adlibregmem[4]&2) *0x10;
     return (adlibstatus);
 }
 

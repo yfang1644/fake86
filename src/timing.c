@@ -34,7 +34,7 @@ LARGE_INTEGER queryperf;
 #include "blaster.h"
 
 extern struct blaster_s blaster;
-extern struct i8253_s i8253;
+extern struct i8253_s i8253[];
 extern void doirq (uint8_t irqnum);
 extern void tickaudio();
 extern void tickssource();
@@ -93,7 +93,7 @@ void timing()
         lastscanlinetick = curtick;
     }
 
-    if (i8253.active[0]) {
+    if (i8253[0].active) {
         //timer interrupt channel on i8253
         if (curtick >= (lasttick + tickgap) ) {
             lasttick = curtick;
@@ -103,9 +103,9 @@ void timing()
 
     if (curtick >= (lasti8253tick + i8253tickgap) ) {
         for (i8253chan=0; i8253chan<3; i8253chan++) {
-            if (i8253.active[i8253chan]) {
-                if (i8253.counter[i8253chan] < 10) i8253.counter[i8253chan] = i8253.chandata[i8253chan];
-                i8253.counter[i8253chan] -= 10;
+            if (i8253[i8253chan].active) {
+                if (i8253[i8253chan].counter < 10) i8253[i8253chan].counter = i8253[i8253chan].chandata;
+                i8253[i8253chan].counter -= 10;
             }
         }
         lasti8253tick = curtick;

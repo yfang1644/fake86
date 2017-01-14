@@ -39,10 +39,10 @@ uint8_t in8259(uint16_t portnum)
     return (0);
 }
 
-uint32_t makeupticks;
 void out8259(uint16_t portnum, uint8_t value)
 {
     uint8_t i;
+    static uint32_t makeupticks = 0;
     switch (portnum & 1) {
     case 0:
         if (value & 0x10) {

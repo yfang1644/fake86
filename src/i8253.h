@@ -17,17 +17,16 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#define PIT_MODE_LATCHCOUNT	0
-#define PIT_MODE_LOBYTE	1
-#define PIT_MODE_HIBYTE	2
-#define PIT_MODE_TOGGLE	3
+#define PIT_MODE_LATCHCOUNT	(0b00000000)
+#define PIT_MODE_LOBYTE	    (0b00010000)
+#define PIT_MODE_HIBYTE	    (0b00100000)
+#define PIT_MODE_TOGGLE	    (0b00110000)
 
 struct i8253_s {
-    uint16_t chandata[3];
-    uint8_t accessmode[3];
-    uint8_t bytetoggle[3];
-    uint32_t effectivedata[3];
-    float chanfreq[3];
-    uint8_t active[3];
-    uint16_t counter[3];
+    uint16_t chandata;
+    uint8_t accessmode;
+    uint8_t bytetoggle;
+    float chanfreq;
+    uint8_t active;
+    uint16_t counter;
 };

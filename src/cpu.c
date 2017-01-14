@@ -1225,6 +1225,7 @@ void exec86 (uint32_t execloops)
 
         if (hltstate) goto skipexecution;
 
+
         /*if ((((uint32_t)segregs[regcs] << 4) + (uint32_t)ip) == 0xFEC59) {
         //printf("Entered F000:EC59, returning to ");
                     ip = pop();
@@ -1947,11 +1948,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0x6D:	/* 6F INSW */
@@ -1972,11 +1971,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0x6E:	/* 6E OUTSB */
@@ -1997,11 +1994,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0x6F:	/* 6F OUTSW */
@@ -2022,11 +2017,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 #endif //CPU_8086
 
@@ -2417,11 +2410,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0xA5:	/* A5 MOVSW */
@@ -2442,11 +2433,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0xA6:	/* A6 CMPSB */
@@ -2472,7 +2461,7 @@ void exec86 (uint32_t execloops)
             if ( (reptype == 1) && !zf) {
                 break;
             }
-            if ( (reptype == 2) && (zf == 1) ) {
+            if ( (reptype == 2) && zf ) {
                 break;
             }
 
@@ -2508,7 +2497,7 @@ void exec86 (uint32_t execloops)
             if ( (reptype == 1) && !zf) {
                 break;
             }
-            if ( (reptype == 2) && (zf == 1) ) {
+            if ( (reptype == 2) && zf ) {
                 break;
             }
 
@@ -2551,11 +2540,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0xAB:	/* AB STOSW */
@@ -2574,11 +2561,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0xAC:	/* AC LODSB */
@@ -2597,11 +2582,9 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
 
-            ip = firstip;
             break;
 
         case 0xAD:	/* AD LODSW */
@@ -2648,7 +2631,7 @@ void exec86 (uint32_t execloops)
             if ( (reptype == 1) && !zf) {
                 break;
             }
-            if ( (reptype == 2) && (zf == 1) ) {
+            if ( (reptype == 2) && zf ) {
                 break;
             }
 
@@ -2682,7 +2665,7 @@ void exec86 (uint32_t execloops)
             if ( (reptype == 1) && !zf) {
                 break;
             }
-            if ( (reptype == 2) & (zf == 1) ) {
+            if ( (reptype == 2) && zf ) {
                 break;
             }
 
@@ -2696,42 +2679,15 @@ void exec86 (uint32_t execloops)
             break;
 
         case 0xB0:	/* B0 MOV regs.byteregs[regal] Ib */
-            regs.byteregs[regal] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB1:	/* B1 MOV regs.byteregs[regcl] Ib */
-            regs.byteregs[regcl] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB2:	/* B2 MOV regs.byteregs[regdl] Ib */
-            regs.byteregs[regdl] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB3:	/* B3 MOV regs.byteregs[regbl] Ib */
-            regs.byteregs[regbl] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB4:	/* B4 MOV regs.byteregs[regah] Ib */
-            regs.byteregs[regah] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB5:	/* B5 MOV regs.byteregs[regch] Ib */
-            regs.byteregs[regch] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB6:	/* B6 MOV regs.byteregs[regdh] Ib */
-            regs.byteregs[regdh] = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            break;
-
         case 0xB7:	/* B7 MOV regs.byteregs[regbh] Ib */
-            regs.byteregs[regbh] = getmem8 (segregs[regcs], ip);
+            temp1 = opcode & 7;
+            regs.byteregs[byteregtable[temp1]] = getmem8 (segregs[regcs], ip);
             StepIP (1);
             break;
 
@@ -2935,7 +2891,7 @@ void exec86 (uint32_t execloops)
             temp16 = signext (getmem8 (segregs[regcs], ip) );
             StepIP (1);
             regs.wordregs[regcx]--;
-            if ( (regs.wordregs[regcx]) && !zf) {
+            if (regs.wordregs[regcx] && !zf) {
                 ip += temp16;
             }
             break;
@@ -2944,7 +2900,7 @@ void exec86 (uint32_t execloops)
             temp16 = signext (getmem8 (segregs[regcs], ip) );
             StepIP (1);
             regs.wordregs[regcx]--;
-            if (regs.wordregs[regcx] && (zf == 1) ) {
+            if (regs.wordregs[regcx] && zf ) {
                 ip += temp16;
             }
             break;
@@ -2969,7 +2925,7 @@ void exec86 (uint32_t execloops)
         case 0xE4:	/* E4 IN regs.byteregs[regal] Ib */
             oper1b = getmem8 (segregs[regcs], ip);
             StepIP (1);
-            regs.byteregs[regal] = (uint8_t) portin (oper1b);
+            regs.byteregs[regal] = portin (oper1b);
             break;
 
         case 0xE5:	/* E5 IN eAX Ib */
@@ -3019,7 +2975,7 @@ void exec86 (uint32_t execloops)
 
         case 0xEC:	/* EC IN regs.byteregs[regal] regdx */
             oper1 = regs.wordregs[regdx];
-            regs.byteregs[regal] = (uint8_t) portin (oper1);
+            regs.byteregs[regal] = portin (oper1);
             break;
 
         case 0xED:	/* ED IN eAX regdx */
@@ -3093,17 +3049,14 @@ void exec86 (uint32_t execloops)
         case 0xFE:	/* FE GRP4 Eb */
             modregrm();
             oper1b = readrm8 (rm);
+            tempcf = cf;
             if (!reg) {
-                tempcf = cf;
                 op_add8 (oper1b, 1, 0);
-                cf = tempcf;
-                writerm8 (rm, res8);
             } else {
-                tempcf = cf;
                 op_sub8 (oper1b, 1, 0);
-                cf = tempcf;
-                writerm8 (rm, res8);
             }
+            cf = tempcf;
+            writerm8 (rm, res8);
             break;
 
         case 0xFF:	/* FF GRP5 Ev */
@@ -3122,7 +3075,6 @@ void exec86 (uint32_t execloops)
             }
             break;
         }
-
 skipexecution:
         if (!running) {
             return;

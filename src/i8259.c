@@ -43,8 +43,12 @@ void out8259(uint16_t portnum, uint8_t value)
 {
     uint8_t i;
     static uint32_t makeupticks = 0;
-    switch (portnum & 1) {
-    case 0:
+    if(portnum & 1) {
+        if ((i8259.icwstep==3) && (i8259.icw[1] & 2)) i8259.icwstep = 4; //single mode, so don't read ICW3
+        if (i8259.icwstep<5) { i8259.icw[i8259.icwstep++] = value; return; }
+        //if we get to this point, this is just a new IMR value
+        i8259.imr = value;
+    } else {
         if (value & 0x10) {
             //begin initialization sequence
             i8259.icwstep = 1;
@@ -58,22 +62,15 @@ void out8259(uint16_t portnum, uint8_t value)
         }
         if (value & 0x20) {
             //EOI command
-            for (i=0; i<8; i++)
-            if ((i8259.isr >> i) & 1) {
-                i8259.isr ^= (1 << i);
-                if ((i==0) && (makeupticks>0)) {
+            for (i = 0x80; i > 0; i>>=1)
+            if (i8259.isr & i) {
+                i8259.isr ^= i;
+                if ((i==1) && (makeupticks>0)) {
                     makeupticks = 0; i8259.irr |= 1;
                 }
                 return;
             }
         }
-        break;
-    case 1:
-        if ((i8259.icwstep==3) && (i8259.icw[1] & 2)) i8259.icwstep = 4; //single mode, so don't read ICW3
-        if (i8259.icwstep<5) { i8259.icw[i8259.icwstep++] = value; return; }
-        //if we get to this point, this is just a new IMR value
-        i8259.imr = value;
-        break;
     }
 }
 

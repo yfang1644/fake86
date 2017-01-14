@@ -40,6 +40,10 @@ void out8253 (uint16_t portnum, uint8_t value)
         ///mode/command
         i8253[value>>6].accessmode = value & PIT_MODE_TOGGLE;
         i8253[value>>6].bytetoggle = 0;
+        if(value & PIT_MODE_TOGGLE == PIT_MODE_LATCHCOUNT) {
+            i8253[value>>6].latched= i8253[value>>6].counter;
+            i8253[value>>6].latch = 2;
+        }
     } else {
         //channel data
         if (i8253[portnum].accessmode == PIT_MODE_LOBYTE) {
@@ -49,7 +53,7 @@ void out8253 (uint16_t portnum, uint8_t value)
         } else if (i8253[portnum].accessmode == PIT_MODE_TOGGLE) {
             curbyte = i8253[portnum].bytetoggle;    // low byte first
             i8253[portnum].bytetoggle = (~i8253[portnum].bytetoggle) & 1;
-        } 
+        }
 
         if (curbyte == 0) {
             //low byte
@@ -89,6 +93,16 @@ uint8_t in8253 (uint16_t portnum)
             curbyte = i8253[portnum].bytetoggle;    // low byte first
             i8253[portnum].bytetoggle = (~i8253[portnum].bytetoggle) & 1;
         } 
+
+        if (i8253[portnum].accessmode == PIT_MODE_LATCHCOUNT) {
+            if(i8253[portnum].latch--) {
+                if (curbyte == 0)
+                    //low byte
+                    return ( (uint8_t) i8253[portnum].latched);
+                else
+                    return ( (uint8_t) (i8253[portnum].latched >> 8) );
+            }
+        }
 
         if (curbyte == 0) {
             //low byte

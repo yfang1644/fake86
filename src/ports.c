@@ -25,17 +25,17 @@
 #include <stdio.h>
 #include "cpu.h"
 
-extern uint8_t portram[0x10000];
+extern uint8_t portram[];
 extern uint8_t speakerenabled;
 
 void (*do_callback_write) (uint16_t portnum, uint8_t value) = NULL;
 uint8_t (*do_callback_read) (uint16_t portnum) = NULL;
 void (*do_callback_write16) (uint16_t portnum, uint16_t value) = NULL;
 uint16_t (*do_callback_read16) (uint16_t portnum) = NULL;
-void * (port_write_callback[0x10000]);
-void * (port_read_callback[0x10000]);
-void * (port_write_callback16[0x10000]);
-void * (port_read_callback16[0x10000]);
+void *port_write_callback[0x10000];
+void *port_read_callback[0x10000];
+void *port_write_callback16[0x10000];
+void *port_read_callback16[0x10000];
 
 extern uint8_t verbose;
 void portout (uint16_t portnum, uint8_t value)

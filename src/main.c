@@ -191,7 +191,6 @@ void inithardware()
     initscreen ( (uint8_t *) build);
 }
 
-uint8_t dohardreset = 0;
 uint8_t audiobufferfilled();
 
 #ifdef _WIN32
@@ -202,6 +201,7 @@ pthread_t emuthread;
 void *EmuThread (void *dummy)
 #endif
 {
+    int dohardreset = 0;
     while (running) {
         if (!speed) exec86 (10000);
         else {
@@ -222,14 +222,17 @@ void *EmuThread (void *dummy)
             dohardreset = 0;
         }
     }
+#ifdef _WIN32
+    return;
+#else
+    return NULL;
+#endif
 }
 
 #ifdef _WIN32
 void runconsole (void *dummy);
-void VideoThread(void *dummy);
 #else
 void *runconsole (void *dummy);
-void *VideoThread(void *dummy);
 #endif
 
 int main (int argc, char *argv[])

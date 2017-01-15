@@ -34,7 +34,7 @@ uint8_t byteregtable[8] = { regal, regcl, regdl, regbl, regah, regch, regdh, reg
 
 uint8_t	RAM[0x100000], readonly[0x100000]; //1MB
 uint8_t	portram[0x10000];  // 64KB
-uint8_t	opcode, segoverride, reptype, bootdrive = 0, hdcount = 0, hltstate = 0;
+uint8_t	opcode, segoverride, bootdrive = 0, hdcount = 0, hltstate = 0;
 uint16_t segregs[4], savecs, saveip, ip, useseg;
 uint16_t cf, pf, af, zf, sf, tf, ifl, df, of, mode, reg, rm;
 uint16_t oper1, oper2, res16, disp16, stacksize, frametemp;
@@ -99,9 +99,9 @@ uint8_t read86 (uint32_t addr32)
         if ( (vidmode == 0xD) || (vidmode == 0xE) || (vidmode == 0x10) || (vidmode == 0x12) ) return (readVGA (addr32 - 0xA0000) );
         if ( (vidmode != 0x13) && (vidmode != 0x12) && (vidmode != 0xD) ) return (RAM[addr32]);
         if ( (VGA_SC[4] & 6) == 0)
-        return (RAM[addr32]);
+            return (RAM[addr32]);
         else
-        return (readVGA (addr32 - 0xA0000) );
+            return (readVGA (addr32 - 0xA0000) );
     }
 
     if (!didbootstrap) {
@@ -1201,7 +1201,7 @@ uint32_t prefetch_base = 0;
 void exec86 (uint32_t execloops)
 {
     uint16_t oldcf, oldsp;
-    uint8_t tempcf;
+    uint8_t tempcf, reptype;
     uint16_t temp16;
     uint32_t loopcount;
     uint8_t docontinue;
@@ -2435,7 +2435,6 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regcx]--;
                 ip = firstip;
             }
-
             break;
 
         case 0xA6:	/* A6 CMPSB */
@@ -2454,24 +2453,18 @@ void exec86 (uint32_t execloops)
             }
 
             flag_sub8 (oper1b, oper2b, 0);
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
-            if ( (reptype == 1) && !zf) {
-                break;
-            }
-            if ( (reptype == 2) && zf ) {
-                break;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
-                break;
+            if (reptype) {
+                regs.wordregs[regcx]--;
+                if ( (reptype == 1) && !zf) {
+                    break;
+                }
+                if ( (reptype == 2) && zf ) {
+                    break;
+                }
+                ip = firstip;
             }
-
-            ip = firstip;
             break;
 
         case 0xA7:	/* A7 CMPSW */
@@ -2490,24 +2483,18 @@ void exec86 (uint32_t execloops)
             }
 
             flag_sub16 (oper1, oper2, 0);
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
-            if ( (reptype == 1) && !zf) {
-                break;
-            }
-            if ( (reptype == 2) && zf ) {
-                break;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
-                break;
+            if (reptype) {
+                regs.wordregs[regcx]--;
+                if ( (reptype == 1) && !zf) {
+                    break;
+                }
+                if ( (reptype == 2) && zf ) {
+                    break;
+                }
+                ip = firstip;
             }
-
-            ip = firstip;
             break;
 
         case 0xA8:	/* A8 TEST regs.byteregs[regal] Ib */
@@ -2542,7 +2529,6 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regcx]--;
                 ip = firstip;
             }
-
             break;
 
         case 0xAB:	/* AB STOSW */
@@ -2563,7 +2549,6 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regcx]--;
                 ip = firstip;
             }
-
             break;
 
         case 0xAC:	/* AC LODSB */
@@ -2584,7 +2569,6 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regcx]--;
                 ip = firstip;
             }
-
             break;
 
         case 0xAD:	/* AD LODSW */
@@ -2603,11 +2587,8 @@ void exec86 (uint32_t execloops)
             loopcount++;
             if (reptype) {
                 regs.wordregs[regcx]--;
-            } else {
-                break;
+                ip = firstip;
             }
-
-            ip = firstip;
             break;
 
         case 0xAE:	/* AE SCASB */
@@ -2624,24 +2605,18 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi]++;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
-            if ( (reptype == 1) && !zf) {
-                break;
-            }
-            if ( (reptype == 2) && zf ) {
-                break;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
-                break;
+            if (reptype) {
+                regs.wordregs[regcx]--;
+                if ( (reptype == 1) && !zf) {
+                    break;
+                }
+                if ( (reptype == 2) && zf ) {
+                    break;
+                }
+                ip = firstip;
             }
-
-            ip = firstip;
             break;
 
         case 0xAF:	/* AF SCASW */
@@ -2658,24 +2633,18 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi] += 2;
             }
 
-            if (reptype) {
-                regs.wordregs[regcx]--;
-            }
-
-            if ( (reptype == 1) && !zf) {
-                break;
-            }
-            if ( (reptype == 2) && zf ) {
-                break;
-            }
-
             totalexec++;
             loopcount++;
-            if (!reptype) {
-                break;
+            if (reptype) {
+                regs.wordregs[regcx]--;
+                if ( (reptype == 1) && !zf) {
+                    break;
+                }
+                if ( (reptype == 2) && zf ) {
+                    break;
+                }
+                ip = firstip;
             }
-
-            ip = firstip;
             break;
 
         case 0xB0:	/* B0 MOV regs.byteregs[regal] Ib */
@@ -2890,8 +2859,7 @@ void exec86 (uint32_t execloops)
         case 0xE0:	/* E0 LOOPNZ Jb */
             temp16 = signext (getmem8 (segregs[regcs], ip) );
             StepIP (1);
-            regs.wordregs[regcx]--;
-            if (regs.wordregs[regcx] && !zf) {
+            if ((--regs.wordregs[regcx]) && !zf) {
                 ip += temp16;
             }
             break;
@@ -2899,8 +2867,7 @@ void exec86 (uint32_t execloops)
         case 0xE1:	/* E1 LOOPZ Jb */
             temp16 = signext (getmem8 (segregs[regcs], ip) );
             StepIP (1);
-            regs.wordregs[regcx]--;
-            if (regs.wordregs[regcx] && zf ) {
+            if ((--regs.wordregs[regcx]) && zf ) {
                 ip += temp16;
             }
             break;
@@ -2908,8 +2875,7 @@ void exec86 (uint32_t execloops)
         case 0xE2:	/* E2 LOOP Jb */
             temp16 = signext (getmem8 (segregs[regcs], ip) );
             StepIP (1);
-            regs.wordregs[regcx] = regs.wordregs[regcx] - 1;
-            if (regs.wordregs[regcx]) {
+            if (--regs.wordregs[regcx]) {
                 ip += temp16;
             }
             break;

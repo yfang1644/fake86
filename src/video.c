@@ -37,8 +37,8 @@
 extern SDL_Surface *screen;
 extern uint8_t verbose;
 extern union _bytewordregs_ regs;
-extern uint8_t RAM[0x100000];   // 1MB
-extern uint8_t portram[0x10000];    // 64KB
+extern uint8_t RAM[];   // 1MB
+extern uint8_t portram[];    // 64KB
 extern uint16_t segregs[4];
 
 extern uint8_t read86 (uint32_t addr32);

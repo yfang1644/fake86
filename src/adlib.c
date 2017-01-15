@@ -24,8 +24,6 @@
 #include <math.h>
 #include "ports.h"
 
-extern int32_t usesamplerate;
-
 uint8_t optable[0x16] = { 0, 0, 0, 1, 1, 1, 255, 255, 0, 0, 0, 1, 1, 1, 255, 255, 0, 0, 0, 1, 1, 1 };
 uint16_t adlibregmem[0xFF], adlibaddr = 0;
 
@@ -105,32 +103,32 @@ uint16_t adlibfreq (uint8_t chan)
     if (!adlibch[chan].keyon) return (0);
     tmpfreq = (uint16_t) adlibch[chan].convfreq;
     switch (adlibch[chan].octave) {
-        case 0:
+    case 0:
         tmpfreq = tmpfreq >> 4;
         break;
-        case 1:
+    case 1:
         tmpfreq = tmpfreq >> 3;
         break;
-        case 2:
+    case 2:
         tmpfreq = tmpfreq >> 2;
         break;
-        case 3:
+    case 3:
         tmpfreq = tmpfreq >> 1;
         break;
-        case 5:
+    case 5:
         tmpfreq = tmpfreq << 1;
         break;
-        case 6:
+    case 6:
         tmpfreq = tmpfreq << 2;
         break;
-        case 7:
+    case 7:
         tmpfreq = tmpfreq << 3;
     }
 
     return (tmpfreq);
 }
 
-int32_t adlibsample (uint8_t curchan)
+int32_t adlibsample (uint8_t curchan, uint32_t usesamplerate)
 {
     int32_t tempsample;
     double tempstep;
@@ -139,7 +137,7 @@ int32_t adlibsample (uint8_t curchan)
 
     if (adlibpercussion && (curchan>=6) && (curchan<=8) ) return (0);
 
-    fullstep = usesamplerate/adlibfreq (curchan);
+    fullstep = usesamplerate / adlibfreq (curchan);
 
     tempsample = (int32_t) oplwave[adlibch[curchan].wavesel][ (uint8_t) ( (double) adlibstep[curchan]/ ( (double) fullstep/ (double) 256) ) ];
     tempstep = adlibenv[curchan];
@@ -151,14 +149,14 @@ int32_t adlibsample (uint8_t curchan)
     return (tempsample);
 }
 
-int16_t adlibgensample()
+int16_t adlibgensample(uint32_t usesamplerate)
 {
     uint8_t curchan;
     int16_t adlibaccum;
     adlibaccum = 0;
     for (curchan=0; curchan<9; curchan++) {
         if (adlibfreq (curchan) !=0) {
-            adlibaccum += (int16_t) adlibsample (curchan);
+            adlibaccum += (int16_t) adlibsample (curchan, usesamplerate);
         }
     }
     return (adlibaccum);

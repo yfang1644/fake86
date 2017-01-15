@@ -216,7 +216,7 @@ void stretchblit (SDL_Surface *target)
 
 void roughblit (SDL_Surface *target)
 {
-    uint32_t srcx, srcy, dstx, dsty, scalemapptr;
+    uint32_t srcx, srcy, dstx, dsty, curcolor, scalemapptr;
     int32_t ofs;
     uint8_t *pixelrgb;
 
@@ -231,12 +231,13 @@ void roughblit (SDL_Surface *target)
         for (dstx=0; dstx<(uint32_t)target->w; dstx++) {
             srcx = scalemap[scalemapptr++];
             pixelrgb = (uint8_t *) &prestretch[srcy][srcx];
-            ( (uint32_t *) target->pixels) [ofs++] = SDL_MapRGB (target->format, pixelrgb[0], pixelrgb[1], pixelrgb[2]);
+            curcolor = SDL_MapRGB (target->format, pixelrgb[0], pixelrgb[1], pixelrgb[2]);
+            ( (uint32_t *) target->pixels) [ofs++] = curcolor;
         }
     }
 
     if (SDL_MUSTLOCK (target) )
-    SDL_UnlockSurface (target);
+        SDL_UnlockSurface (target);
     SDL_UpdateRect (target, 0, 0, target->w, target->h);
 }
 
@@ -255,7 +256,7 @@ void doubleblit (SDL_Surface *target)
     uint8_t *pixelrgb;
 
     if (SDL_MUSTLOCK (target) )
-    if (SDL_LockSurface (target) < 0)
+        if (SDL_LockSurface (target) < 0)
     return;
 
     for (dsty=0; dsty<(uint32_t)target->h; dsty += 2) {
@@ -360,14 +361,13 @@ void draw ()
                 }
                 if (vidmode==4) {
                     curpixel = curpixel * 2 + usepal + intensity;
-                    if (curpixel == (usepal + intensity) )  curpixel = cgabg;
-                    color = palettecga[curpixel];
-                    prestretch[y][x] = color;
+                    if (curpixel == (usepal + intensity) )
+                        curpixel = cgabg;
                 } else {
                     curpixel = curpixel * 63;
-                    color = palettecga[curpixel];
-                    prestretch[y][x] = color;
                 }
+                color = palettecga[curpixel];
+                prestretch[y][x] = color;
             }
         }
         break;
@@ -443,8 +443,7 @@ void draw ()
                 color += ( ( (VRAM[0x10000 + vidptr] >> x1) & 1) << 1);
                 color += ( ( (VRAM[0x20000 + vidptr] >> x1) & 1) << 2);
                 color += ( ( (VRAM[0x30000 + vidptr] >> x1) & 1) << 3);
-                color = palettevga[color];
-                prestretch[y][x] = color;
+                prestretch[y][x] = palettevga[color];
             }
         }
         break;
@@ -459,8 +458,7 @@ void draw ()
                 color |= ( ( (VRAM[0x10000 + vidptr] >> x1) & 1) << 1);
                 color |= ( ( (VRAM[0x20000 + vidptr] >> x1) & 1) << 2);
                 color |= ( ( (VRAM[0x30000 + vidptr] >> x1) & 1) << 3);
-                color = palettevga[color];
-                prestretch[y][x] = color;
+                prestretch[y][x] = palettevga[color];
             }
         }
         break;
@@ -514,9 +512,10 @@ void draw ()
             else blockw = 16;
             x1 = cursx * blockw;
             y1 = cursy * 8 + 8 - curheight;
+            curpixel = RAM[videobase+cursy*cols*2+cursx*2+1]&15;
             for (y=y1*2; y<y1*2+curheight; y++) {
                 for (x=x1; x<x1+blockw; x++) {
-                    color = palettecga[RAM[videobase+cursy*cols*2+cursx*2+1]&15];
+                    color = palettecga[curpixel];
                     prestretch[y&1023][x&1023] = color;
                 }
             }

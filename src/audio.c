@@ -38,11 +38,11 @@ FILE *wav_file = NULL;
 
 SDL_AudioSpec wanted;
 int8_t audbuf[96000];
-int32_t audbufptr, usebuffersize, usesamplerate = AUDIO_DEFAULT_SAMPLE_RATE, latency = AUDIO_DEFAULT_LATENCY;
+uint32_t audbufptr, usebuffersize, usesamplerate = AUDIO_DEFAULT_SAMPLE_RATE, latency = AUDIO_DEFAULT_LATENCY;
 uint8_t speakerenabled = 0;
 
 extern uint64_t gensamplerate;
-extern int16_t adlibgensample();
+extern int16_t adlibgensample(uint32_t usesamplerate);
 extern int16_t speakergensample(uint64_t samplerate);
 extern int16_t getssourcebyte();
 extern int16_t getBlasterSample();
@@ -84,11 +84,12 @@ void tickaudio()
 {
     int16_t sample;
     if (audbufptr >= usebuffersize) return;
-    sample = adlibgensample() >> 4;
+    sample = adlibgensample(usesamplerate) >> 4;
     if (usessource) sample += getssourcebyte();
     sample += getBlasterSample();
     if (speakerenabled) sample += (speakergensample(gensamplerate) >> 1);
-    if (audbufptr < sizeof(audbuf) ) audbuf[audbufptr++] = (uint8_t) ((uint16_t) sample+128);
+    if (audbufptr < sizeof(audbuf) )
+        audbuf[audbufptr++] = (uint8_t) ((uint16_t) sample+128);
 }
 
 void fill_audio (void *udata, int8_t *stream, int len)

@@ -33,8 +33,6 @@
 #define strcmpi strcasecmp
 #endif
 
-extern uint8_t running;
-
 extern uint8_t insertdisk (uint8_t drivenum, char *filename);
 extern void ejectdisk (uint8_t drivenum);
 
@@ -46,7 +44,7 @@ void waitforcmd (int8_t *dst, uint16_t maxlen)
 
     maxlen -= 2;
     dst[0] = 0;
-    while (running) {
+    while (1) {
         if (_kbhit () ) {
             cc = (uint8_t) _getch ();
             switch (cc) {
@@ -104,10 +102,11 @@ void *runconsole (void *dummy)
 #endif
 {
     int8_t inputline[1024];
+    int *run = (int *)dummy;
 
     printf ("\nFake86 management console\n");
     printf ("Type \"help\" for a summary of commands.\n");
-    while (running) {
+    while (*run) {
         printf ("\n>");
         waitforcmd (inputline, sizeof(inputline) );
         if (!strcmpi ( (const char *) inputline, "change fd0")) {
@@ -132,7 +131,7 @@ void *runconsole (void *dummy)
         } else if (!strcmpi ( (const char *) inputline, "help")) {
             consolehelp ();
         } else if (!strcmpi ( (const char *) inputline, "quit")) {
-            running = 0;
+            *run= 0;
         } else printf("Invalid command was entered.\n");
     }
 #ifdef  _WIN32

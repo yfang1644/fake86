@@ -24,7 +24,7 @@
 #include "disk.h"
 #include "cpu.h"
 
-extern uint8_t RAM[0x100000], cf, hdcount;
+extern uint8_t RAM[], cf, hdcount;
 extern uint16_t segregs[4];
 extern union _bytewordregs_ regs;
 
@@ -125,15 +125,15 @@ void diskhandler()
 {
     static uint8_t lastdiskah[256], lastdiskcf[256];
     switch (regs.byteregs[regah]) {
-        case 0: //reset disk system
+    case 0: //reset disk system
         regs.byteregs[regah] = 0;
         cf = 0; //useless function in an emulator. say success and return.
         break;
-        case 1: //return last status
+    case 1: //return last status
         regs.byteregs[regah] = lastdiskah[regs.byteregs[regdl]];
         cf = lastdiskcf[regs.byteregs[regdl]];
         return;
-        case 2: //read sector(s) into memory
+    case 2: //read sector(s) into memory
         if (disk[regs.byteregs[regdl]].inserted) {
             readdisk (regs.byteregs[regdl], segregs[reges], getreg16 (regbx), regs.byteregs[regch] + (regs.byteregs[regcl]/64) *256, regs.byteregs[regcl] & 63, regs.byteregs[regdh], regs.byteregs[regal]);
             cf = 0;
@@ -143,7 +143,7 @@ void diskhandler()
             regs.byteregs[regah] = 1;
         }
         break;
-        case 3: //write sector(s) from memory
+    case 3: //write sector(s) from memory
         if (disk[regs.byteregs[regdl]].inserted) {
             writedisk (regs.byteregs[regdl], segregs[reges], getreg16 (regbx), regs.byteregs[regch] + (regs.byteregs[regcl]/64) *256, regs.byteregs[regcl] & 63, regs.byteregs[regdh], regs.byteregs[regal]);
             cf = 0;
@@ -154,12 +154,12 @@ void diskhandler()
             regs.byteregs[regah] = 1;
         }
         break;
-        case 4:
-        case 5: //format track
+    case 4:
+    case 5: //format track
         cf = 0;
         regs.byteregs[regah] = 0;
         break;
-        case 8: //get drive parameters
+    case 8: //get drive parameters
         if (disk[regs.byteregs[regdl]].inserted) {
             cf = 0;
             regs.byteregs[regah] = 0;

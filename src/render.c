@@ -37,7 +37,7 @@ SDL_Surface *screen = NULL;
 uint32_t *scalemap = NULL;
 uint8_t regenscalemap = 1;
 
-extern uint8_t RAM[0x100000], portram[0x10000];
+extern uint8_t RAM[];
 extern uint8_t VRAM[262144], vidmode, cgabg, vidgfxmode, vidcolor, running;
 extern uint16_t cursx, cursy, cols, rows, cursorvisible;
 extern uint8_t updatedscreen;
@@ -284,6 +284,7 @@ void draw ()
     uint32_t planemode, vgapage, color, chary, charx, vidptr, divx, divy, curchar, curpixel, usepal, intensity, blockw, curheight;
     uint32_t x, y, x1, y1;
     uint8_t bytecolor;
+    uint8_t vgaport;
 
     switch (vidmode) {
     case 0:
@@ -304,7 +305,7 @@ void draw ()
                     charx = x/16;
                     divx = 2;
                 }
-                if ( (portram[0x3D8]==9) && (portram[0x3D4]==9) ) {
+                if ( (portin(0x3D8)==9) && (portin(0x3D4)==9) ) {
                     chary = y/4;
                     vidptr = vgapage + videobase + chary*cols*2 + charx*2;
                     curchar = RAM[vidptr];
@@ -317,7 +318,7 @@ void draw ()
                 }
                 color = (bytecolor << ((x/divx)&7) ) & 0x80;
                 if (vidcolor) {
-                    /*if (!color) if (portram[0x3D8]&128) color = palettecga[ (RAM[vidptr+1]/16) &7];
+                    /*if (!color) if (portin(0x3D8)&128) color = palettecga[ (RAM[vidptr+1]/16) &7];
                     else*/ if (!color) color = palettecga[RAM[vidptr+1]/16]; //high intensity background
                     else color = palettecga[RAM[vidptr+1]&15];
                 } else {
@@ -337,8 +338,9 @@ void draw ()
     case 5:
         nw = 320;
         nh = 200;
-        usepal = (portram[0x3D9]>>5) & 1;
-        intensity = ( (portram[0x3D9]>>4) & 1) << 3;
+        vgaport = portin(0x3D9);
+        usepal = (vgaport>>5) & 1;
+        intensity = ( (vgaport>>4) & 1) << 3;
         for (y=0; y<nh; y++) {
             for (x=0; x<nw; x++) {
                 charx = x;
@@ -536,8 +538,9 @@ void *VideoThread (void *dummy)
     uint32_t cursorprevtick, cursorcurtick, delaycalc;
     cursorprevtick = SDL_GetTicks();
     cursorvisible = 0;
+    int *run = (int *)dummy;
 
-    while (running) {
+    while (*run) {
         cursorcurtick = SDL_GetTicks();
         if ( (cursorcurtick - cursorprevtick) >= 250) {
             updatedscreen = 1;
@@ -582,9 +585,9 @@ uint8_t initscreen (uint8_t *ver)
     loadCGAfont(PATH_DATAFILES "font8x16.dat");
 #ifdef _WIN32
     InitializeCriticalSection (&screenmutex);
-    _beginthread (VideoThread, 0, NULL);
+    _beginthread (VideoThread, 0, &running);
 #else
-    pthread_create (&vidthread, NULL, (void *) VideoThread, NULL);
+    pthread_create (&vidthread, NULL, (void *) VideoThread, &running);
 #endif
 
     return (1);

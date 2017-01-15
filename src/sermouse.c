@@ -83,13 +83,6 @@ uint8_t insermouse (uint16_t portnum)
     return (sermouse.reg[portnum & 7]);
 }
 
-void initsermouse (uint16_t baseport, uint8_t irq)
-{
-    sermouse.bufptr = 0;
-    set_port_write_redirector (baseport, baseport + 7, &outsermouse);
-    set_port_read_redirector (baseport, baseport + 7, &insermouse);
-}
-
 void sermouseevent (uint8_t buttons, int8_t xrel, int8_t yrel)
 {
     uint8_t highbits = 0;
@@ -99,4 +92,11 @@ void sermouseevent (uint8_t buttons, int8_t xrel, int8_t yrel)
     bufsermousedata (0x40 | (buttons << 4) | highbits);
     bufsermousedata (xrel & 63);
     bufsermousedata (yrel & 63);
+}
+
+void initsermouse (uint16_t baseport, uint8_t irq)
+{
+    sermouse.bufptr = 0;
+    set_port_write_redirector (baseport, baseport + 7, &outsermouse);
+    set_port_read_redirector (baseport, baseport + 7, &insermouse);
 }

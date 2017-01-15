@@ -41,61 +41,8 @@ struct structadlibchan {
     uint8_t wavesel;
 } adlibch[9];
 
-double attacktable[16] = { 1.0003, 1.00025, 1.0002, 1.00015, 1.0001, 1.00009, 1.00008, 1.00007, 1.00006, 1.00005, 1.00004, 1.00003, 1.00002, 1.00001, 1.000005 }; //1.003, 1.05, 1.01, 1.015, 1.02, 1.025, 1.03, 1.035, 1.04, 1.045, 1.05, 1.055, 1.06, 1.065, 1.07, 1.075 };
-double decaytable[16] = { 0.99999, 0.999985, 0.99998, 0.999975, 0.99997, 0.999965, 0.99996, 0.999955, 0.99995, 0.999945, 0.99994, 0.999935, 0.99994, 0.999925, 0.99992, 0.99991 };
 double adlibenv[9], adlibdecay[9], adlibattack[9];
 uint8_t adlibdidattack[9], adlibpercussion = 0, adlibstatus = 0;
-
-void outadlib (uint16_t portnum, uint8_t value)
-{
-    if (portnum == ADLIBPORT) {
-        adlibaddr = value;
-        return;
-    }
-    portnum = adlibaddr;
-    adlibregmem[portnum] = value;
-    switch (portnum) {
-        case 4: //timer control
-        if (value&0x80) {
-            adlibstatus = 0;
-            adlibregmem[4] = 0;
-        }
-        break;
-        case 0xBD:
-        if (value & 0x10) adlibpercussion = 1;
-        else adlibpercussion = 0;
-        break;
-    }
-    if ( (portnum >= 0x60) && (portnum <= 0x75) ) {
-        //attack/decay
-        portnum &= 15;
-        adlibattack[portnum] = attacktable[15- (value>>4) ]*1.006;
-        adlibdecay[portnum] = decaytable[value&15];
-    } else if ( (portnum >= 0xA0) && (portnum <= 0xB8) ) {
-        //octave, freq, key on
-        portnum &= 15;
-        if (!adlibch[portnum].keyon && ( (adlibregmem[0xB0+portnum]>>5) &1) ) {
-            adlibdidattack[portnum] = 0;
-            adlibenv[portnum] = 0.0025;
-        }
-        adlibch[portnum].freq = adlibregmem[0xA0+portnum] | ( (adlibregmem[0xB0+portnum]&3) <<8);
-        adlibch[portnum].convfreq = ( (double) adlibch[portnum].freq * 0.7626459);
-        adlibch[portnum].keyon = (adlibregmem[0xB0+portnum]>>5) &1;
-        adlibch[portnum].octave = (adlibregmem[0xB0+portnum]>>2) &7;
-    } else if ( (portnum >= 0xE0) && (portnum <= 0xF5) ) {
-        //waveform select
-        portnum &= 15;
-        if (portnum<9) adlibch[portnum].wavesel = value&3;
-    }
-}
-
-uint8_t inadlib (uint16_t portnum)
-{
-    if (!adlibregmem[4]) adlibstatus = 0;
-    else adlibstatus = 0x80;
-    adlibstatus += (adlibregmem[4]&1) *0x40 + (adlibregmem[4]&2) *0x10;
-    return (adlibstatus);
-}
 
 uint16_t adlibfreq (uint8_t chan)
 {
@@ -206,6 +153,65 @@ void initwavetable()
                 oplwave[3][i] = 0;
             }
         }
+    }
+}
+
+uint8_t inadlib (uint16_t portnum)
+{
+    if (!adlibregmem[4]) adlibstatus = 0;
+    else adlibstatus = 0x80;
+    adlibstatus += (adlibregmem[4]&1) *0x40 + (adlibregmem[4]&2) *0x10;
+    return (adlibstatus);
+}
+
+void outadlib (uint16_t portnum, uint8_t value)
+{
+    double attacktable[16] = {
+        1.0003, 1.00025, 1.0002, 1.00015, 1.0001, 1.00009, 1.00008,
+        1.00007, 1.00006, 1.00005, 1.00004, 1.00003, 1.00002,
+        1.00001, 1.000005 }; //1.003, 1.05, 1.01, 1.015, 1.02, 1.025, 1.03, 1.035, 1.04, 1.045, 1.05, 1.055, 1.06, 1.065, 1.07, 1.075 };
+    double decaytable[16] = {
+        0.99999, 0.999985, 0.99998, 0.999975, 0.99997, 0.999965,
+        0.99996, 0.999955, 0.99995, 0.999945, 0.99994, 0.999935,
+        0.99994, 0.999925, 0.99992, 0.99991 };
+    uint16_t nibble;
+
+    if (portnum == ADLIBPORT) {
+        adlibaddr = value;
+        return;
+    }
+    portnum = adlibaddr;
+    nibble = portnum & 15;
+    adlibregmem[portnum] = value;
+    switch (portnum) {
+    case 4: //timer control
+        if (value&0x80) {
+            adlibstatus = 0;
+            adlibregmem[4] = 0;
+        }
+        break;
+    case 0xBD:
+        if (value & 0x10) adlibpercussion = 1;
+        else adlibpercussion = 0;
+        break;
+    }
+    if ( (portnum >= 0x60) && (portnum <= 0x75) ) {
+        //attack/decay
+        adlibattack[nibble] = attacktable[15- (value>>4) ]*1.006;
+        adlibdecay[nibble] = decaytable[value&15];
+    } else if ( (portnum >= 0xA0) && (portnum <= 0xB8) ) {
+        //octave, freq, key on
+        if (!adlibch[nibble].keyon && ( adlibregmem[0xB0+nibble] & 0x20) ) {
+            adlibdidattack[nibble] = 0;
+            adlibenv[nibble] = 0.0025;
+        }
+        adlibch[nibble].freq = adlibregmem[0xA0+nibble] | ( (adlibregmem[0xB0+nibble]&3) <<8);
+        adlibch[nibble].convfreq = ( (double) adlibch[nibble].freq * 0.7626459);
+        adlibch[nibble].keyon = (adlibregmem[0xB0+nibble]>>5) &1;
+        adlibch[nibble].octave = (adlibregmem[0xB0+nibble]>>2) &7;
+    } else if ( (portnum >= 0xE0) && (portnum <= 0xF5) ) {
+        //waveform select
+        if (nibble<9) adlibch[nibble].wavesel = value&3;
     }
 }
 

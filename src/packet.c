@@ -33,9 +33,9 @@
 #define PCAP_OPENFLAG_PROMISCUOUS 1
 #endif
 
-extern uint8_t RAM[0x100000];
-extern uint8_t verbose;
-uint8_t ethif, net_enabled = 0;
+extern uint8_t RAM[];
+extern uint8_t netif, verbose;
+uint8_t net_enabled = 0;
 uint8_t dopktrecv = 0;
 
 pcap_if_t *alldevs;
@@ -118,7 +118,7 @@ void initpcap()
     /* At this point, we don't need any more the device list. Free it */
     pcap_freealldevs (alldevs);
     net_enabled = 1;
-    }
+}
 
 void setmac()
 {

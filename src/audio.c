@@ -24,12 +24,9 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <process.h>
-#else
-#include <pthread.h>
 #endif
 #include <stdint.h>
 #include <stdio.h>
-#include <memory.h>
 #include "audio.h"
 
 extern SDL_Surface *screen;
@@ -39,7 +36,6 @@ FILE *wav_file = NULL;
 SDL_AudioSpec wanted;
 int8_t audbuf[96000];
 uint32_t audbufptr, usebuffersize, usesamplerate = AUDIO_DEFAULT_SAMPLE_RATE, latency = AUDIO_DEFAULT_LATENCY;
-extern uint8_t portram[];
 
 extern uint64_t gensamplerate;
 extern int16_t adlibgensample(uint32_t usesamplerate);
@@ -88,7 +84,7 @@ void tickaudio()
     if (usessource) sample += getssourcebyte();
     sample += getBlasterSample();
 
-    if((portram[0x61] & 3) == 3)  // speakerenabled
+    if( ( portin(0x61) & 3) == 3)  // speakerenabled
         sample += (speakergensample(gensamplerate) >> 1);
     if (audbufptr < sizeof(audbuf) )
         audbuf[audbufptr++] = (uint8_t) ((uint16_t) sample+128);

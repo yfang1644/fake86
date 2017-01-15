@@ -23,19 +23,14 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "cpu.h"
 
-extern uint8_t portram[];
-
-void (*do_callback_write) (uint16_t portnum, uint8_t value) = NULL;
-uint8_t (*do_callback_read) (uint16_t portnum) = NULL;
 void *port_write_callback[0x10000];
 void *port_read_callback[0x10000];
 
 extern uint8_t verbose;
 void portout (uint16_t portnum, uint8_t value)
 {
-    portram[portnum] = value;
+    void (*do_callback_write) (uint16_t portnum, uint8_t value) = NULL;
     //if (verbose) printf("portout(0x%X, 0x%02X);\n", portnum, value);
 
     do_callback_write = (void (*) (uint16_t portnum, uint8_t value) ) port_write_callback[portnum];
@@ -52,18 +47,12 @@ void portout16 (uint16_t portnum, uint16_t value)
 
 uint8_t portin (uint16_t portnum)
 {
+    uint8_t (*do_callback_read) (uint16_t portnum) = NULL;
     //if (verbose) printf("portin(0x%X);\n", portnum);
-    switch (portnum) {
-    case 0x62:
-        return (0x00);
-    case 0x60:
-    case 0x61:
-    case 0x63:
-    case 0x64:
-        return (portram[portnum]);
-    }
+
     do_callback_read = (uint8_t (*) (uint16_t portnum) ) port_read_callback[portnum];
-    if (do_callback_read != (void *) 0) return ( (*do_callback_read) (portnum) );
+    if (do_callback_read != (void *) 0)
+        return ( (*do_callback_read) (portnum) );
     return (0xFF);
 }
 

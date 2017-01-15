@@ -47,7 +47,6 @@ extern uint8_t updatedscreen;
 union _bytewordregs_ regs;
 
 uint8_t	running = 0, didbootstrap = 0;
-uint8_t	ethif;
 
 extern uint8_t vidmode, verbose;
 

@@ -33,15 +33,15 @@ extern struct struct_drive disk[256];
 #define strcmpi _strcmpi
 #endif
 
-extern int8_t *biosfile;
+extern char *biosfile;
 extern uint8_t bootdrive, ethif, verbose, cgaonly, usessource, noscale, nosmooth, renderbenchmark, useconsole, doaudio;
 extern uint32_t framedelay, textbase, usefullscreen, speed;
-extern int32_t usesamplerate, latency;
+extern uint32_t usesamplerate, latency;
 uint16_t constantw = 0, constanth = 0;
 uint8_t slowsystem = 0;
 
 extern uint8_t insertdisk (uint8_t drivenum, char *filename);
-extern uint32_t loadrom (uint32_t addr32, uint8_t *filename, uint8_t failure_fatal);
+extern uint32_t loadrom (uint32_t addr32, char *filename, uint8_t failure_fatal);
 
 void showhelp ()
 {

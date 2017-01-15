@@ -53,7 +53,7 @@ uint32_t framedelay = 20;
 uint8_t scrmodechange = 0, noscale = 0, nosmooth = 1, renderbenchmark = 0, doaudio = 1;
 char windowtitle[128];
 
-void setwindowtitle (int8_t *extra)
+void setwindowtitle (char *extra)
 {
     char temptext[128];
     sprintf (temptext, "%s%s", windowtitle, extra);
@@ -572,7 +572,7 @@ void *VideoThread (void *dummy)
 #endif
 }
 
-uint8_t initscreen (uint8_t *ver)
+uint8_t initscreen (char *ver)
 {
     if (doaudio) {
         if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) ) return (0);

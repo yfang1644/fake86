@@ -197,7 +197,7 @@ extern uint32_t usegrabmode;
 extern void doirq (uint8_t irqnum);
 
 extern void sermouseevent (uint8_t buttons, int8_t xrel, int8_t yrel);
-extern void setwindowtitle (int8_t *extra);
+extern void setwindowtitle (char *extra);
 
 void mousegrabtoggle()
 {

@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <memory.h>
+#include <string.h>
 #include "mutex.h"
 #include "ports.h"
 
@@ -41,14 +41,14 @@ CRITICAL_SECTION screenmutex;
 pthread_t consolethread;
 #endif
 
-const uint8_t *build = BUILD_STRING;
+const char *build = BUILD_STRING;
 
 extern uint8_t RAM[], readonly[];
 extern uint8_t running, renderbenchmark;
 
 extern void reset86();
 extern void exec86 (uint32_t execloops);
-extern uint8_t initscreen (uint8_t *ver);
+extern uint8_t initscreen (char *ver);
 extern void doscrmodechange();
 extern uint8_t handleinput();
 
@@ -59,10 +59,11 @@ extern uint64_t cached_access_count, uncached_access_count;
 extern uint8_t scrmodechange, doaudio;
 extern uint64_t totalexec, totalframes;
 
-uint8_t *biosfile = NULL, verbose = 0, cgaonly = 0, useconsole = 0;
+char *biosfile = NULL;
+uint8_t verbose = 0, cgaonly = 0, useconsole = 0;
 uint32_t speed = 0;
 
-uint32_t loadbinary (uint32_t addr32, int8_t *filename, uint8_t roflag)
+uint32_t loadbinary (uint32_t addr32, char *filename, uint8_t roflag)
 {
     FILE *binfile = NULL;
     uint32_t readsize;
@@ -82,7 +83,7 @@ uint32_t loadbinary (uint32_t addr32, int8_t *filename, uint8_t roflag)
     return (readsize);
 }
 
-uint32_t loadrom (uint32_t addr32, int8_t *filename, uint8_t failure_fatal)
+    uint32_t loadrom (uint32_t addr32, char *filename, uint8_t failure_fatal)
 {
     uint32_t readsize;
     readsize = loadbinary (addr32, filename, 1);
@@ -98,7 +99,7 @@ uint32_t loadrom (uint32_t addr32, int8_t *filename, uint8_t failure_fatal)
     }
 }
 
-uint32_t loadbios (int8_t *filename)
+uint32_t loadbios (char *filename)
 {
     FILE *binfile = NULL;
     uint32_t readsize;
@@ -188,7 +189,7 @@ void inithardware()
     printf ("OK\n");
     if (doaudio) initaudio();
     inittiming();
-    initscreen ( (uint8_t *) build);
+    initscreen (build);
 }
 
 uint8_t audiobufferfilled();

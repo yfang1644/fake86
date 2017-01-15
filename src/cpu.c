@@ -851,7 +851,7 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
 uint8_t op_grp3_8(uint8_t oper1b)
 {
     uint32_t temp1, temp2, temp3;
-    uint8_t res;
+    uint8_t res = 0;
     uint16_t oper1;
 
     switch (reg) {
@@ -925,7 +925,7 @@ uint8_t op_grp3_8(uint8_t oper1b)
 uint16_t op_grp3_16(uint16_t oper1)
 {
     uint32_t temp1, temp2, temp3;
-    uint16_t res;
+    uint16_t res = 0;
 
     switch (reg) {
     case 0:
@@ -998,7 +998,7 @@ uint16_t op_grp3_16(uint16_t oper1)
 uint16_t op_grp5(uint16_t oper1)
 {
     uint8_t tempcf;
-    uint16_t res;
+    uint16_t res = 0;
 
 	switch (reg) {
     case 0: /* INC Ev */
@@ -1200,8 +1200,8 @@ uint32_t prefetch_base = 0;
 void exec86 (uint32_t execloops)
 {
     uint16_t oldcf, oldsp;
-    uint8_t tempcf, reptype, res8;
-    uint16_t temp16, res16;
+    uint8_t tempcf, reptype, res8 = 0;
+    uint16_t temp16, res16 = 0;
     uint32_t loopcount;
     uint8_t docontinue, nestlev;
     uint16_t firstip, stacksize, frametemp;
@@ -1302,7 +1302,7 @@ void exec86 (uint32_t execloops)
                 res8 = op_add8(oper1b, oper2b, 0);
             } else if (opcode == 0x8) {
                 res8 = op_or8(oper1b, oper2b);
-            } else if (opcode = 0x10) {
+            } else if (opcode == 0x10) {
                 res8 = op_add8(oper1b, oper2b, cf);
             } else if (opcode == 0x18) {
                 res8 = op_sub8(oper1b, oper2b, cf);
@@ -1334,9 +1334,9 @@ void exec86 (uint32_t execloops)
                 res16 = op_add16(oper1, oper2, cf);
             } else if (opcode == 0x19) {
                 res16 = op_sub16(oper1, oper2, cf);
-            } else if(opcode == 0x21) {
+            } else if (opcode == 0x21) {
                 res16 = op_and16(oper1, oper2);
-            } else if(opcode == 0x29) {
+            } else if (opcode == 0x29) {
                 res16 = op_sub16(oper1, oper2, 0);
             } else {
                 res16 = op_xor16(oper1, oper2);

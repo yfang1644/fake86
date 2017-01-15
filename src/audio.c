@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "audio.h"
+#include "ports.h"
 
 struct wav_hdr_s wav_hdr;
 FILE *wav_file = NULL;

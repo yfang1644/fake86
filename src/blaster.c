@@ -237,11 +237,11 @@ uint8_t inBlaster (uint16_t portnum)
     switch (portnum) {
     case 0x0:
     case 0x8:
-        ret = inadlib (0x388);
+        ret = inadlib (ADLIBPORT);
         break;
     case 0x1:
     case 0x9:
-        ret = inadlib (0x389);
+        ret = inadlib (ADLIBPORT);
         break;
     case 0x5: //mixer data
         ret = mixer[mixerindex];

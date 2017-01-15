@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include "ports.h"
 
-extern uint8_t portram[0x10000];
+extern uint8_t portram[];
 uint8_t ssourcebuf[16], ssourceptr = 0, ssourceactive = 0;
 int16_t ssourcecursample = 0;
 

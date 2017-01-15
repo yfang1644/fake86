@@ -50,7 +50,7 @@ extern void reset86();
 extern void exec86 (uint32_t execloops);
 extern uint8_t initscreen (uint8_t *ver);
 extern void doscrmodechange();
-extern void handleinput();
+extern uint8_t handleinput();
 
 #ifdef CPU_ADDR_MODE_CACHE
 extern uint64_t cached_access_count, uncached_access_count;
@@ -126,6 +126,7 @@ extern void tickaudio();
 extern void inittiming();
 extern void initaudio();
 extern void init8253();
+extern void init8255();
 extern void init8259();
 extern void init8237();
 extern void initVideoPorts();
@@ -138,8 +139,8 @@ extern void initsoundsource();
 extern void isa_ne2000_init (uint16_t baseport, uint8_t irq);
 extern void initBlaster (uint16_t baseport, uint8_t irq);
 
+uint8_t  ethif;
 #ifdef NETWORKING_ENABLED
-extern uint8_t  ethif;
 extern void initpcap();
 extern void dispatch();
 #endif
@@ -155,6 +156,9 @@ void inithardware()
     memset (port_read_callback, 0, sizeof (port_read_callback) );
     printf ("  - Intel 8253 timer: ");
     init8253();
+    printf ("OK\n");
+    printf ("  - Intel 8255 PPI: ");
+    init8255();
     printf ("OK\n");
     printf ("  - Intel 8259 interrupt controller: ");
     init8259();
@@ -198,7 +202,9 @@ void *EmuThread (void *dummy)
 #endif
 {
     int dohardreset = 0;
-    while (running) {
+    int *run = (int *)dummy;
+
+    while (*run) {
         if (!speed) exec86 (10000);
         else {
             exec86(speed / 100);
@@ -268,21 +274,21 @@ int main (int argc, char *argv[])
 #endif
     if (useconsole) {
 #ifdef _WIN32
-        _beginthread (runconsole, 0, NULL);
+        _beginthread (runconsole, 0, &running);
 #else
-        pthread_create (&consolethread, NULL, (void *) runconsole, NULL);
+        pthread_create (&consolethread, NULL, (void *) runconsole, &running);
 #endif
     }
 
 #ifdef _WIN32
-    _beginthread (EmuThread, 0, NULL);
+    _beginthread (EmuThread, 0, &running);
 #else
-    pthread_create (&emuthread, NULL, (void *) EmuThread, NULL);
+    pthread_create (&emuthread, NULL, (void *) EmuThread, &running);
 #endif
 
     starttick = SDL_GetTicks();
     while (running) {
-        handleinput();
+        running = handleinput();
 #ifdef NETWORKING_ENABLED
         if (ethif < 254) dispatch();
 #endif

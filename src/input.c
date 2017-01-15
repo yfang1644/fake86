@@ -22,11 +22,10 @@
 
 #include <SDL/SDL.h>
 #include <stdint.h>
-
+#include "ports.h"
 extern uint32_t usegrabmode;
 
 extern void doirq (uint8_t irqnum);
-extern uint8_t running, portram[0x10000];
 extern SDL_Surface *screen;
 
 uint8_t translatescancode (uint16_t keyval) {
@@ -218,24 +217,25 @@ void mousegrabtoggle()
 
 extern uint8_t scrmodechange;
 extern uint32_t usefullscreen;
-void handleinput()
+uint8_t handleinput()
 {
     SDL_Event event;
     static uint8_t keydown[0x100];
     uint8_t buttons = 0;
     int mx = 0, my = 0;
-    uint8_t tempbuttons;
+    uint8_t tempbuttons, keypos;
 
     if(!SDL_PollEvent(&event))
-        return;
+        return 1;
 
     switch (event.type) {
     case SDL_KEYDOWN:
-        portram[0x60] = translatescancode (event.key.keysym.sym);
-        portram[0x64] |= 2;
+        keypos = translatescancode (event.key.keysym.sym);
+        portout(0x60, keypos);
+        portout(0x64 , portin(0x64) | 2);
         doirq (1);
-        //printf("%02X\n", translatescancode(event.key.keysym.sym));
-        keydown[translatescancode (event.key.keysym.sym) ] = 1;
+        //printf("%02X\n", keypos));
+        keydown[keypos] = 1;
         if (keydown[0x38] && keydown[0x1D] && (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_ON) ) {
             keydown[0x1D] = 0;
             keydown[0x32] = 0;
@@ -252,10 +252,11 @@ void handleinput()
         }
         break;
     case SDL_KEYUP:
-        portram[0x60] = translatescancode (event.key.keysym.sym) | 0x80;
-        portram[0x64] |= 2;
+        keypos = translatescancode (event.key.keysym.sym);
+        portout(0x60, keypos | 0x80);
+        portout(0x64 , portin(0x64) | 2);
         doirq (1);
-        keydown[translatescancode (event.key.keysym.sym) ] = 0;
+        keydown[keypos] = 0;
         break;
     case SDL_MOUSEBUTTONDOWN:
         if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF) {
@@ -288,9 +289,10 @@ void handleinput()
         }
         break;
     case SDL_QUIT:
-        running = 0;
+        return 0;
         break;
     default:
         break;
     }
+    return 1;
 }

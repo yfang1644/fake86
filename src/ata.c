@@ -89,10 +89,10 @@ void outATA (uint16_t portnum, uint8_t value)
     //printf("[DEBUG] ATA port %Xh write: %02X\n", portnum, value);
     //getch();
     switch (portnum) {
-        case 0x1F6:
+    case 0x1F6:
         drivesel = (value >> 4) & 1;
         break;
-        case 0x1F7: //command register
+    case 0x1F7: //command register
         cmdATA (value);
         break;
     }
@@ -103,16 +103,16 @@ uint8_t inATA (uint16_t portnum)
     //if (portnum != 0x1F0) printf("[DEBUG] ATA port %Xh read\n", portnum);
     //getch();
     switch (portnum) {
-        case 0x1F0: //data read
+    case 0x1F0: //data read
         if (dataptr < 512) {
             //printf("%c", databuf[dataptr]);
             return (databuf[dataptr++]);
         }
         else return (0);
-        case 0x1F1: //error register
+    case 0x1F1: //error register
         if (drivesel == 1) return (1);
         else return (0);
-        case 0x1F7: //status register
+    case 0x1F7: //status register
         statusreg = ATA_STATUS_READY;
         if (drivesel == 1) statusreg |= ATA_STATUS_ERROR;
         if (dataptr < 512) statusreg |= ATA_STATUS_DRQ;

@@ -1289,115 +1289,190 @@ void exec86 (uint32_t execloops)
 
         switch (opcode) {
         case 0x0:	/* 00 ADD Eb Gb */
+        case 0x8:	/* 08 OR Eb Gb */
+        case 0x10:	/* 10 ADC Eb Gb */
+        case 0x18:	/* 18 SBB Eb Gb */
+        case 0x20:	/* 20 AND Eb Gb */
+        case 0x28:	/* 28 SUB Eb Gb */
+        case 0x30:	/* 30 XOR Eb Gb */
             modregrm();
             oper1b = readrm8 (rm);
             oper2b = getreg8 (reg);
-            res8 = op_add8(oper1b, oper2b, 0);
+            if (opcode == 0) {
+                res8 = op_add8(oper1b, oper2b, 0);
+            } else if (opcode == 0x8) {
+                res8 = op_or8(oper1b, oper2b);
+            } else if (opcode = 0x10) {
+                res8 = op_add8(oper1b, oper2b, cf);
+            } else if (opcode == 0x18) {
+                res8 = op_sub8(oper1b, oper2b, cf);
+            } else if (opcode == 0x20) {
+                res8 = op_and8(oper1b, oper2b);
+            } else if (opcode == 0x28) {
+                res8 = op_sub8(oper1b, oper2b, 0);
+            } else {
+                res8 = op_xor8(oper1b, oper2b);
+            }
             writerm8 (rm, res8);
             break;
 
         case 0x1:	/* 01 ADD Ev Gv */
+        case 0x9:	/* 09 OR Ev Gv */
+        case 0x11:	/* 11 ADC Ev Gv */
+        case 0x19:	/* 19 SBB Ev Gv */
+        case 0x21:	/* 21 AND Ev Gv */
+        case 0x29:	/* 29 SUB Ev Gv */
+        case 0x31:	/* 31 XOR Ev Gv */
             modregrm();
             oper1 = readrm16 (rm);
             oper2 = getreg16 (reg);
-            res16 = op_add16(oper1, oper2, 0);
+            if (opcode == 0x1) {
+                res16 = op_add16(oper1, oper2, 0);
+            } else if (opcode == 0x9) {
+                res16 = op_or16(oper1, oper2);
+            } else if (opcode == 0x11) {
+                res16 = op_add16(oper1, oper2, cf);
+            } else if (opcode == 0x19) {
+                res16 = op_sub16(oper1, oper2, cf);
+            } else if(opcode == 0x21) {
+                res16 = op_and16(oper1, oper2);
+            } else if(opcode == 0x29) {
+                res16 = op_sub16(oper1, oper2, 0);
+            } else {
+                res16 = op_xor16(oper1, oper2);
+            }
             writerm16 (rm, res16);
             break;
 
         case 0x2:	/* 02 ADD Gb Eb */
+        case 0xA:	/* 0A OR Gb Eb */
+        case 0x12:	/* 12 ADC Gb Eb */
+        case 0x1A:	/* 1A SBB Gb Eb */
+        case 0x22:	/* 22 AND Gb Eb */
+        case 0x2A:	/* 2A SUB Gb Eb */
+        case 0x32:	/* 32 XOR Gb Eb */
             modregrm();
             oper1b = getreg8 (reg);
             oper2b = readrm8 (rm);
-            res8 = op_add8(oper1b, oper2b, 0);
+            if (opcode == 0x2) {
+                res8 = op_add8(oper1b, oper2b, 0);
+            } else if (opcode == 0xA) {
+                res8 = op_or8(oper1b, oper2b);
+            } else if (opcode == 0x12) {
+                res8 = op_add8(oper1b, oper2b, cf);
+            } else if (opcode == 0x1A) {
+                res8 = op_sub8(oper1b, oper2b, cf);
+            } else if (opcode == 0x22) {
+                res8 = op_and8(oper1b, oper2b);
+            } else if (opcode == 0x2A) {
+                res8 = op_sub8(oper1b, oper2b, 0);
+            } else {
+                res8 = op_xor8(oper1b, oper2b);
+            }
             getreg8 (reg) = res8;
             break;
 
         case 0x3:	/* 03 ADD Gv Ev */
+        case 0xB:	/* 0B OR Gv Ev */
+        case 0x13:	/* 13 ADC Gv Ev */
+        case 0x1B:	/* 1B SBB Gv Ev */
+        case 0x23:	/* 23 AND Gv Ev */
+        case 0x2B:	/* 2B SUB Gv Ev */
+        case 0x33:	/* 33 XOR Gv Ev */
             modregrm();
             oper1 = getreg16 (reg);
             oper2 = readrm16 (rm);
-            res16 = op_add16(oper1, oper2, 0);
+            if (opcode == 0x3) {
+                res16 = op_add16(oper1, oper2, 0);
+            } else if (opcode == 0xB) {
+                res16 = op_or16(oper1, oper2);
+                if ( (oper1 == 0xF802) && (oper2 == 0xF802) ) {
+                    sf = 0;	/* cheap hack to make Wolf 3D think we're a 286 so it plays */
+                }
+            } else if (opcode == 0x13) {
+                res16 = op_add16(oper1, oper2, cf);
+            } else if (opcode == 0x1B) {
+                res16 = op_sub16(oper1, oper2, cf);
+            } else if (opcode == 0x23) {
+                res16 = op_and16(oper1, oper2);
+            } else if (opcode == 0x2B) {
+                res16 = op_sub16(oper1, oper2, 0);
+            } else {
+                res16 = op_xor16(oper1, oper2);
+            }
             getreg16 (reg) = res16;
             break;
 
         case 0x4:	/* 04 ADD regs.byteregs[regal] Ib */
+        case 0xC:	/* 0C OR regs.byteregs[regal] Ib */
+        case 0x14:	/* 14 ADC regs.byteregs[regal] Ib */
+        case 0x1C:	/* 1C SBB regs.byteregs[regal] Ib */
+        case 0x24:	/* 24 AND regs.byteregs[regal] Ib */
+        case 0x2C:	/* 2C SUB regs.byteregs[regal] Ib */
+        case 0x34:	/* 34 XOR regs.byteregs[regal] Ib */
             oper1b = regs.byteregs[regal];
             oper2b = getmem8 (segregs[regcs], ip);
             StepIP (1);
-            res8 = op_add8(oper1b, oper2b, 0);
+            if (opcode == 0x4) {
+                res8 = op_add8(oper1b, oper2b, 0);
+            } else if (opcode == 0xC) {
+                res8 = op_or8(oper1b, oper2b);
+            } else if (opcode == 0x14) {
+                res8 = op_add8(oper1b, oper2b, cf);
+            } else if (opcode == 0x1C) {
+                res8 = op_sub8(oper1b, oper2b, cf);
+            } else if (opcode == 0x24) {
+                res8 = op_and8(oper1b, oper2b);
+            } else if (opcode == 0x2C) {
+                res8 = op_sub8(oper1b, oper2b, 0);
+            } else {
+                res8 = op_xor8(oper1b, oper2b);
+            }
             regs.byteregs[regal] = res8;
             break;
 
         case 0x5:	/* 05 ADD eAX Iv */
+        case 0xD:	/* 0D OR eAX Iv */
+        case 0x15:	/* 15 ADC eAX Iv */
+        case 0x1D:	/* 1D SBB eAX Iv */
+        case 0x25:	/* 25 AND eAX Iv */
+        case 0x2D:	/* 2D SUB eAX Iv */
+        case 0x35:	/* 35 XOR eAX Iv */
             oper1 = regs.wordregs[regax];
             oper2 = getmem16 (segregs[regcs], ip);
             StepIP (2);
-            res16 = op_add16(oper1, oper2, 0);
+            if (opcode == 0x5) {
+                res16 = op_add16(oper1, oper2, 0);
+            } else if (opcode == 0xD) {
+                res16 = op_or16(oper1, oper2);
+            } else if (opcode == 0x15) {
+                res16 = op_add16(oper1, oper2, cf);
+            } else if (opcode == 0x1D) {
+                res16 = op_sub16(oper1, oper2, cf);
+            } else if (opcode == 0x25) {
+                res16 = op_and16(oper1, oper2);
+            } else if (opcode == 0x2D) {
+                res16 = op_sub16(oper1, oper2, 0);
+            } else {
+                res16 = op_xor16(oper1, oper2);
+            }
+
             regs.wordregs[regax] = res16;
             break;
 
         case 0x6:	/* 06 PUSH segregs[reges] */
-            push (segregs[reges]);
+        case 0xE:	/* 0E PUSH segregs[regcs] */
+        case 0x16:	/* 16 PUSH segregs[regss] */
+        case 0x1E:	/* 1E PUSH segregs[regds] */
+            temp1 = (opcode >>3) & 3;
+            push (segregs[temp1]);
             break;
 
         case 0x7:	/* 07 POP segregs[reges] */
-            segregs[reges] = pop();
-        break;
-
-        case 0x8:	/* 08 OR Eb Gb */
-            modregrm();
-            oper1b = readrm8 (rm);
-            oper2b = getreg8 (reg);
-            res8 = op_or8(oper1b, oper2b);
-            writerm8 (rm, res8);
-            break;
-
-        case 0x9:	/* 09 OR Ev Gv */
-            modregrm();
-            oper1 = readrm16 (rm);
-            oper2 = getreg16 (reg);
-            res16 = op_or16(oper1, oper2);
-            writerm16 (rm, res16);
-            break;
-
-        case 0xA:	/* 0A OR Gb Eb */
-            modregrm();
-            oper1b = getreg8 (reg);
-            oper2b = readrm8 (rm);
-            res8 = op_or8(oper1b, oper2b);
-            getreg8 (reg) = res8;
-            break;
-
-        case 0xB:	/* 0B OR Gv Ev */
-            modregrm();
-            oper1 = getreg16 (reg);
-            oper2 = readrm16 (rm);
-            res16 = op_or16(oper1, oper2);
-            if ( (oper1 == 0xF802) && (oper2 == 0xF802) ) {
-                sf = 0;	/* cheap hack to make Wolf 3D think we're a 286 so it plays */
-            }
-
-            getreg16 (reg) = res16;
-            break;
-
-        case 0xC:	/* 0C OR regs.byteregs[regal] Ib */
-            oper1b = regs.byteregs[regal];
-            oper2b = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            res8 = op_or8(oper1b, oper2b);
-            regs.byteregs[regal] = res8;
-            break;
-
-        case 0xD:	/* 0D OR eAX Iv */
-            oper1 = regs.wordregs[regax];
-            oper2 = getmem16 (segregs[regcs], ip);
-            StepIP (2);
-            res16 = op_or16(oper1, oper2);
-            regs.wordregs[regax] = res16;
-            break;
-
-        case 0xE:	/* 0E PUSH segregs[regcs] */
-            push (segregs[regcs]);
+        case 0x17:	/* 17 POP segregs[regss] */
+        case 0x1F:	/* 1F POP segregs[regds] */
+            temp1 = (opcode >>3) & 3;
+            segregs[temp1] = pop();
             break;
 
 #ifdef CPU_ALLOW_POP_CS //only the 8086/8088 does this.
@@ -1405,166 +1480,6 @@ void exec86 (uint32_t execloops)
             segregs[regcs] = pop();
             break;
 #endif
-
-        case 0x10:	/* 10 ADC Eb Gb */
-            modregrm();
-            oper1b = readrm8 (rm);
-            oper2b = getreg8 (reg);
-            res8 = op_add8(oper1b, oper2b, cf);
-            writerm8 (rm, res8);
-            break;
-
-        case 0x11:	/* 11 ADC Ev Gv */
-            modregrm();
-            oper1 = readrm16 (rm);
-            oper2 = getreg16 (reg);
-            res16 = op_add16(oper1, oper2, cf);
-            writerm16 (rm, res16);
-            break;
-
-        case 0x12:	/* 12 ADC Gb Eb */
-            modregrm();
-            oper1b = getreg8 (reg);
-            oper2b = readrm8 (rm);
-            res8 = op_add8(oper1b, oper2b, cf);
-            getreg8 (reg) = res8;
-            break;
-
-        case 0x13:	/* 13 ADC Gv Ev */
-            modregrm();
-            oper1 = getreg16 (reg);
-            oper2 = readrm16 (rm);
-            res16 = op_add16(oper1, oper2, cf);
-            getreg16 (reg) = res16;
-            break;
-
-        case 0x14:	/* 14 ADC regs.byteregs[regal] Ib */
-            oper1b = regs.byteregs[regal];
-            oper2b = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            res8 = op_add8(oper1b, oper2b, cf);
-            regs.byteregs[regal] = res8;
-            break;
-
-        case 0x15:	/* 15 ADC eAX Iv */
-            oper1 = regs.wordregs[regax];
-            oper2 = getmem16 (segregs[regcs], ip);
-            StepIP (2);
-            res16 = op_add16(oper1, oper2, cf);
-            regs.wordregs[regax] = res16;
-            break;
-
-        case 0x16:	/* 16 PUSH segregs[regss] */
-            push (segregs[regss]);
-            break;
-
-        case 0x17:	/* 17 POP segregs[regss] */
-            segregs[regss] = pop();
-            break;
-
-        case 0x18:	/* 18 SBB Eb Gb */
-            modregrm();
-            oper1b = readrm8 (rm);
-            oper2b = getreg8 (reg);
-            res8 = op_sub8(oper1b, oper2b, cf);
-            writerm8 (rm, res8);
-            break;
-
-        case 0x19:	/* 19 SBB Ev Gv */
-            modregrm();
-            oper1 = readrm16 (rm);
-            oper2 = getreg16 (reg);
-            res16 = op_sub16(oper1, oper2, cf);
-            writerm16 (rm, res16);
-            break;
-
-        case 0x1A:	/* 1A SBB Gb Eb */
-            modregrm();
-            oper1b = getreg8 (reg);
-            oper2b = readrm8 (rm);
-            res8 = op_sub8(oper1b, oper2b, cf);
-            putreg8 (reg, res8);
-            break;
-
-        case 0x1B:	/* 1B SBB Gv Ev */
-            modregrm();
-            oper1 = getreg16 (reg);
-            oper2 = readrm16 (rm);
-            res16 = op_sub16(oper1, oper2, cf);
-            getreg16 (reg) = res16;
-            break;
-
-        case 0x1C:	/* 1C SBB regs.byteregs[regal] Ib */
-            oper1b = regs.byteregs[regal];
-            oper2b = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            res8 = op_sub8(oper1b, oper2b, cf);
-            regs.byteregs[regal] = res8;
-            break;
-
-        case 0x1D:	/* 1D SBB eAX Iv */
-            oper1 = regs.wordregs[regax];
-            oper2 = getmem16 (segregs[regcs], ip);
-            StepIP (2);
-            res16 = op_sub16(oper1, oper2, cf);
-            regs.wordregs[regax] = res16;
-            break;
-
-        case 0x1E:	/* 1E PUSH segregs[regds] */
-            push (segregs[regds]);
-            break;
-
-        case 0x1F:	/* 1F POP segregs[regds] */
-            segregs[regds] = pop();
-            break;
-
-        case 0x20:	/* 20 AND Eb Gb */
-            modregrm();
-            oper1b = readrm8 (rm);
-            oper2b = getreg8 (reg);
-            res8 = op_and8(oper1b, oper2b);
-            writerm8 (rm, res8);
-            break;
-
-        case 0x21:	/* 21 AND Ev Gv */
-            modregrm();
-            oper1 = readrm16 (rm);
-            oper2 = getreg16 (reg);
-            res16 = op_and16(oper1, oper2);
-            writerm16 (rm, res16);
-            break;
-
-        case 0x22:	/* 22 AND Gb Eb */
-            modregrm();
-            oper1b = getreg8 (reg);
-            oper2b = readrm8 (rm);
-            res8 = op_and8(oper1b, oper2b);
-            getreg8 (reg) = res8;
-            break;
-
-        case 0x23:	/* 23 AND Gv Ev */
-            modregrm();
-            oper1 = getreg16 (reg);
-            oper2 = readrm16 (rm);
-            res16 = op_and16(oper1, oper2);
-            getreg16 (reg) = res16;
-            break;
-
-        case 0x24:	/* 24 AND regs.byteregs[regal] Ib */
-            oper1b = regs.byteregs[regal];
-            oper2b = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            res8 = op_and8(oper1b, oper2b);
-            regs.byteregs[regal] = res8;
-            break;
-
-        case 0x25:	/* 25 AND eAX Iv */
-            oper1 = regs.wordregs[regax];
-            oper2 = getmem16 (segregs[regcs], ip);
-            StepIP (2);
-            res16 = op_and16(oper1, oper2);
-            regs.wordregs[regax] = res16;
-            break;
 
         case 0x27:	/* 27 DAA */
             if ( ( (regs.byteregs[regal] & 0xF) > 9) || (af == 1) ) {
@@ -1592,54 +1507,6 @@ void exec86 (uint32_t execloops)
             flag_szp8 (regs.byteregs[regal]);
             break;
 
-        case 0x28:	/* 28 SUB Eb Gb */
-            modregrm();
-            oper1b = readrm8 (rm);
-            oper2b = getreg8 (reg);
-            res8 = op_sub8(oper1b, oper2b, 0);
-            writerm8 (rm, res8);
-            break;
-
-        case 0x29:	/* 29 SUB Ev Gv */
-            modregrm();
-            oper1 = readrm16 (rm);
-            oper2 = getreg16 (reg);
-            res16 = op_sub16(oper1, oper2, 0);
-            writerm16 (rm, res16);
-            break;
-
-        case 0x2A:	/* 2A SUB Gb Eb */
-            modregrm();
-            oper1b = getreg8 (reg);
-            oper2b = readrm8 (rm);
-            res8 = op_sub8(oper1b, oper2b, 0);
-            getreg8 (reg) = res8;
-            break;
-
-        case 0x2B:	/* 2B SUB Gv Ev */
-            modregrm();
-            oper1 = getreg16 (reg);
-            oper2 = readrm16 (rm);
-            res16 = op_sub16(oper1, oper2, 0);
-            getreg16 (reg) = res16;
-            break;
-
-        case 0x2C:	/* 2C SUB regs.byteregs[regal] Ib */
-            oper1b = regs.byteregs[regal];
-            oper2b = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            res8 = op_sub8(oper1b, oper2b, 0);
-            regs.byteregs[regal] = res8;
-            break;
-
-        case 0x2D:	/* 2D SUB eAX Iv */
-            oper1 = regs.wordregs[regax];
-            oper2 = getmem16 (segregs[regcs], ip);
-            StepIP (2);
-            res16 = op_sub16(oper1, oper2, 0);
-            regs.wordregs[regax] = res16;
-            break;
-
         case 0x2F:	/* 2F DAS */
             if ( ( (regs.byteregs[regal] & 15) > 9) || (af == 1) ) {
                 oper1 = regs.byteregs[regal] - 6;
@@ -1663,54 +1530,6 @@ void exec86 (uint32_t execloops)
             }
 
             flag_szp8 (regs.byteregs[regal]);
-            break;
-
-        case 0x30:	/* 30 XOR Eb Gb */
-            modregrm();
-            oper1b = readrm8 (rm);
-            oper2b = getreg8 (reg);
-            res8 = op_xor8(oper1b, oper2b);
-            writerm8 (rm, res8);
-            break;
-
-        case 0x31:	/* 31 XOR Ev Gv */
-            modregrm();
-            oper1 = readrm16 (rm);
-            oper2 = getreg16 (reg);
-            res16 = op_xor16(oper1, oper2);
-            writerm16 (rm, res16);
-            break;
-
-        case 0x32:	/* 32 XOR Gb Eb */
-            modregrm();
-            oper1b = getreg8 (reg);
-            oper2b = readrm8 (rm);
-            res8 = op_xor8(oper1b, oper2b);
-            getreg8 (reg) = res8;
-            break;
-
-        case 0x33:	/* 33 XOR Gv Ev */
-            modregrm();
-            oper1 = getreg16 (reg);
-            oper2 = readrm16 (rm);
-            res16 = op_xor16(oper1, oper2);
-            getreg16 (reg) = res16;
-            break;
-
-        case 0x34:	/* 34 XOR regs.byteregs[regal] Ib */
-            oper1b = regs.byteregs[regal];
-            oper2b = getmem8 (segregs[regcs], ip);
-            StepIP (1);
-            res8 = op_xor8(oper1b, oper2b);
-            regs.byteregs[regal] = res8;
-            break;
-
-        case 0x35:	/* 35 XOR eAX Iv */
-            oper1 = regs.wordregs[regax];
-            oper2 = getmem16 (segregs[regcs], ip);
-            StepIP (2);
-            res16 = op_xor16(oper1, oper2);
-            regs.wordregs[regax] = res16;
             break;
 
         case 0x37:	/* 37 AAA ASCII */

@@ -36,8 +36,4 @@ void set_port_write_redirector (uint16_t start, uint16_t end, void *callback);
 
 void set_port_read_redirector (uint16_t start, uint16_t end, void *callback);
 
-void set_port_write_redirector_16 (uint16_t start, uint16_t end, void *callback);
-
-void set_port_read_redirector_16 (uint16_t start, uint16_t end, void *callback);
-
 #endif //_PORTS_H

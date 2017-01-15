@@ -1205,7 +1205,7 @@ void exec86 (uint32_t execloops)
     uint16_t temp16;
     uint32_t loopcount;
     uint8_t docontinue;
-    static uint16_t firstip;
+    uint16_t firstip;
     static uint16_t trap_toggle = 0;
     uint32_t temp1, temp2, temp3;
 
@@ -1224,7 +1224,6 @@ void exec86 (uint32_t execloops)
         }
 
         if (hltstate) goto skipexecution;
-
 
         /*if ((((uint32_t)segregs[regcs] << 4) + (uint32_t)ip) == 0xFEC59) {
         //printf("Entered F000:EC59, returning to ");

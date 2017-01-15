@@ -43,7 +43,7 @@ pthread_t consolethread;
 
 const uint8_t *build = BUILD_STRING;
 
-extern uint8_t RAM[0x100000], readonly[0x100000];
+extern uint8_t RAM[], readonly[];
 extern uint8_t running, renderbenchmark;
 
 extern void reset86();
@@ -133,8 +133,6 @@ extern void killaudio();
 extern void initsermouse (uint16_t baseport, uint8_t irq);
 extern void *port_write_callback[0x10000];
 extern void *port_read_callback[0x10000];
-extern void *port_write_callback16[0x10000];
-extern void *port_read_callback16[0x10000];
 extern void initadlib (uint16_t baseport);
 extern void initsoundsource();
 extern void isa_ne2000_init (uint16_t baseport, uint8_t irq);
@@ -155,8 +153,6 @@ void inithardware()
     printf ("Initializing emulated hardware:\n");
     memset (port_write_callback, 0, sizeof (port_write_callback) );
     memset (port_read_callback, 0, sizeof (port_read_callback) );
-    memset (port_write_callback16, 0, sizeof (port_write_callback16) );
-    memset (port_read_callback16, 0, sizeof (port_read_callback16) );
     printf ("  - Intel 8253 timer: ");
     init8253();
     printf ("OK\n");

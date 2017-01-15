@@ -39,7 +39,7 @@ FILE *wav_file = NULL;
 SDL_AudioSpec wanted;
 int8_t audbuf[96000];
 uint32_t audbufptr, usebuffersize, usesamplerate = AUDIO_DEFAULT_SAMPLE_RATE, latency = AUDIO_DEFAULT_LATENCY;
-uint8_t speakerenabled = 0;
+extern uint8_t portram[];
 
 extern uint64_t gensamplerate;
 extern int16_t adlibgensample(uint32_t usesamplerate);
@@ -87,7 +87,9 @@ void tickaudio()
     sample = adlibgensample(usesamplerate) >> 4;
     if (usessource) sample += getssourcebyte();
     sample += getBlasterSample();
-    if (speakerenabled) sample += (speakergensample(gensamplerate) >> 1);
+
+    if((portram[0x61] & 3) == 3)  // speakerenabled
+        sample += (speakergensample(gensamplerate) >> 1);
     if (audbufptr < sizeof(audbuf) )
         audbuf[audbufptr++] = (uint8_t) ((uint16_t) sample+128);
 }

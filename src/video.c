@@ -44,9 +44,9 @@ extern uint16_t segregs[4];
 extern uint8_t read86 (uint32_t addr32);
 extern uint8_t scrmodechange;
 
-uint8_t VRAM[262144], vidmode, cgabg, blankattr, vidgfxmode, vidcolor;
-uint16_t cursx, cursy, cols = 80, rows = 25, vgapage, cursorposition, cursorvisible;
-uint8_t updatedscreen, clocksafe, port3da, port6;
+uint8_t VRAM[0x40000], vidmode, cgabg, blankattr, vidgfxmode, vidcolor;
+uint16_t cursx, cursy, cols = 80, rows = 25, cursorposition, cursorvisible;
+uint8_t updatedscreen, clocksafe, port3da;
 uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
 uint32_t videobase= 0xB8000, textbase = 0xB8000;
 uint32_t palettecga[16] = {

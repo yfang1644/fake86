@@ -39,7 +39,7 @@ void out8253 (uint16_t portnum, uint8_t value)
         ///mode/command
         i8253[value>>6].accessmode = value & PIT_MODE_TOGGLE;
         i8253[value>>6].bytetoggle = 0;
-        if(value & PIT_MODE_TOGGLE == PIT_MODE_LATCHCOUNT) {
+        if((value & PIT_MODE_TOGGLE) == PIT_MODE_LATCHCOUNT) {
             i8253[value>>6].latched= i8253[value>>6].counter;
             i8253[value>>6].latch = 2;
         }

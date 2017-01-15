@@ -69,15 +69,16 @@ void write86 (uint32_t addr32, uint8_t value)
     }
 
     if ( (tempaddr32 >= 0xA0000) && (tempaddr32 <= 0xBFFFF) ) {
-        if ( (vidmode != 0x13) && (vidmode != 0x12) && (vidmode != 0xD) && (vidmode != 0x10) ) {
-            RAM[tempaddr32] = value;
-            updatedscreen = 1;
-        } else if ( ( (VGA_SC[4] & 6) == 0) && (vidmode != 0xD) && (vidmode != 0x10) && (vidmode != 0x12) ) {
-            RAM[tempaddr32] = value;
-            updatedscreen = 1;
-        } else {
-            writeVGA (tempaddr32 - 0xA0000, value);
-        }
+        if ((vidmode != 0x13) &&
+            (vidmode != 0x12) &&
+            (vidmode != 0xD) &&
+            (vidmode != 0x10) ) {
+                RAM[tempaddr32] = value;
+            } else if ( ( (VGA_SC[4] & 6) == 0) && (vidmode == 0x13)) {
+                RAM[tempaddr32] = value;
+            } else {
+                writeVGA (tempaddr32 - 0xA0000, value);
+            }
 
         updatedscreen = 1;
     } else {
@@ -95,8 +96,17 @@ uint8_t read86 (uint32_t addr32)
 {
     addr32 &= 0xFFFFF;
     if ( (addr32 >= 0xA0000) && (addr32 <= 0xBFFFF) ) {
-        if ( (vidmode == 0xD) || (vidmode == 0xE) || (vidmode == 0x10) || (vidmode == 0x12) ) return (readVGA (addr32 - 0xA0000) );
-        if ( (vidmode != 0x13) && (vidmode != 0x12) && (vidmode != 0xD) ) return (RAM[addr32]);
+        if ((vidmode == 0xD) ||
+            (vidmode == 0xE) ||
+            (vidmode == 0x10) ||
+            (vidmode == 0x12) ) {
+                return (readVGA (addr32 - 0xA0000) );
+            }
+        if ((vidmode != 0x13) &&
+            (vidmode != 0x12) &&
+            (vidmode != 0xD) ) {
+                return (RAM[addr32]);
+            }
         if ( (VGA_SC[4] & 6) == 0)
             return (RAM[addr32]);
         else

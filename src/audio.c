@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include "audio.h"
 
-extern SDL_Surface *screen;
 struct wav_hdr_s wav_hdr;
 FILE *wav_file = NULL;
 

@@ -39,7 +39,7 @@ uint32_t *scalemap = NULL;
 uint8_t regenscalemap = 1;
 
 extern uint8_t RAM[];
-extern uint8_t VRAM[262144], vidmode, cgabg, vidgfxmode, vidcolor, running;
+extern uint8_t VRAM[], vidmode, cgabg, vidgfxmode, vidcolor, running;
 extern uint16_t cursx, cursy, cols, rows, cursorvisible;
 extern uint8_t updatedscreen;
 extern uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];

@@ -23,10 +23,6 @@
 #include <SDL/SDL.h>
 #include <stdint.h>
 #include "ports.h"
-extern uint32_t usegrabmode;
-
-extern void doirq (uint8_t irqnum);
-extern SDL_Surface *screen;
 
 uint8_t translatescancode (uint16_t keyval) {
 	switch (keyval) {
@@ -197,6 +193,9 @@ uint8_t translatescancode (uint16_t keyval) {
     }
 }
 
+extern uint32_t usegrabmode;
+extern void doirq (uint8_t irqnum);
+
 extern void sermouseevent (uint8_t buttons, int8_t xrel, int8_t yrel);
 extern void setwindowtitle (int8_t *extra);
 
@@ -217,6 +216,7 @@ void mousegrabtoggle()
 
 extern uint8_t scrmodechange;
 extern uint32_t usefullscreen;
+extern SDL_Surface *screen;
 uint8_t handleinput()
 {
     SDL_Event event;
@@ -292,6 +292,7 @@ uint8_t handleinput()
         return 0;
         break;
     default:
+        return 1;
         break;
     }
     return 1;

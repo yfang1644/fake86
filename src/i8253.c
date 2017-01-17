@@ -63,14 +63,14 @@ void out8253 (uint16_t portnum, uint8_t value)
         }
         i8253[portnum].active = 1;
 
-        if (i8253[portnum].chandata) {
-            i8253[portnum].chanfreq = (float) ( (uint32_t) ( ( 1193182.0 / i8253[portnum].chandata) ) );
-        } else {
-            i8253[portnum].chanfreq = (float) ( (uint32_t) ( ( 1193182.0 / 65536.0) ) );
-        }
         //printf("[DEBUG] PIT channel %u counter changed to %u (%f Hz)\n", portnum, i8253[portnum].chandata, i8253[portnum].chanfreq);
-        if (portnum == 0)
-            tickgap = (uint64_t) ( (float) hostfreq / i8253[portnum].chanfreq );
+        if (portnum == 0) {
+            if(i8253[portnum].chandata) {
+                tickgap = (uint64_t) ( (float) hostfreq * i8253[portnum].chandata / 1193182.0);
+            } else {
+                tickgap = (uint64_t) ((float)hostfreq * 65536/1193182.0);
+            }
+        }
     }
 }
 

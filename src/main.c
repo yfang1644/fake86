@@ -60,7 +60,7 @@ extern uint8_t scrmodechange, doaudio;
 extern uint64_t totalexec, totalframes;
 
 char *biosfile = NULL;
-uint8_t verbose = 0, cgaonly = 0, useconsole = 0;
+uint8_t verbose = 0, useconsole = 0;
 uint32_t speed = 0;
 
 uint32_t loadbinary (uint32_t addr32, char *filename, uint8_t roflag)
@@ -83,7 +83,7 @@ uint32_t loadbinary (uint32_t addr32, char *filename, uint8_t roflag)
     return (readsize);
 }
 
-    uint32_t loadrom (uint32_t addr32, char *filename, uint8_t failure_fatal)
+uint32_t loadrom (uint32_t addr32, char *filename, uint8_t failure_fatal)
 {
     uint32_t readsize;
     readsize = loadbinary (addr32, filename, 1);
@@ -185,7 +185,7 @@ void inithardware()
     initBlaster (0x220, 7);
     printf ("OK\n");
     printf ("  - Serial mouse (Microsoft compatible): ");
-    initsermouse (0x3F8, 4);
+    initsermouse (SERIALPORT, 4);
     printf ("OK\n");
     if (doaudio) initaudio();
     inittiming();

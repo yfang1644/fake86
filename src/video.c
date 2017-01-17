@@ -46,7 +46,7 @@ extern uint8_t scrmodechange;
 
 uint8_t VRAM[0x40000], vidmode, cgabg, blankattr, vidgfxmode, vidcolor;
 uint16_t cursx, cursy, cols = 80, rows = 25, cursorposition, cursorvisible;
-uint8_t updatedscreen, clocksafe, port3da;
+uint8_t updatedscreen, port3da;
 uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
 uint32_t videobase= 0xB8000, textbase = 0xB8000;
 uint32_t palettecga[16] = {
@@ -331,8 +331,6 @@ uint32_t usefullscreen = 0, usegrabmode = SDL_GRAB_OFF;
 
 uint8_t latchRGB = 0, latchPal = 0, VGA_latch[4], stateDAC = 0;
 uint8_t latchReadRGB = 0, latchReadPal = 0;
-uint32_t tempRGB;
-uint16_t oldw, oldh; //used when restoring screen mode
 
 extern uint32_t nw, nh;
 
@@ -482,29 +480,27 @@ void vidinterrupt()
         cursy = 0;
         if ( (regs.byteregs[regal] & 0x80) == 0x00) {
             memset (&RAM[0xA0000], 0, 0x1FFFF);
-            memset (VRAM, 0, 262144);
+            memset (VRAM, 0, 0x40000);
         }
         switch (vidmode) {
         case 127: //hercules
-            nw = oldw = 720;
-            nh = oldh = 348;
+            nw = 720;
+            nh = 348;
             scrmodechange = 1;
             break;
         case 0x12:
-            nw = oldw = 640;
-            nh = oldh = 480;
+            nw = 640;
+            nh = 480;
             scrmodechange = 1;
             break;
         case 0x13:
-            oldw = 640;
-            oldh = 400;
             nw = 320;
             nh = 200;
             scrmodechange = 1;
             break;
         default:
-            nw = oldw = 640;
-            nh = oldh = 400;
+            nw = 640;
+            nh = 400;
             scrmodechange = 1;
             break;
         }
@@ -532,33 +528,30 @@ void vidinterrupt()
 uint16_t vtotal = 0;
 void outVGA (uint16_t portnum, uint8_t value)
 {
-    static uint8_t oldah, oldal;
+    uint8_t oldax;
     uint8_t flip3c0 = 0;
+    static uint32_t tempRGB;
+
     updatedscreen = 1;
     switch (portnum) {
     case 0x3B8: //hercules support
         if ( ( (value & 2) == 2) && (vidmode != 127) ) {
-            oldah = regs.byteregs[regah];
-            oldal = regs.byteregs[regal];
-            regs.byteregs[regah] = 0;
-            regs.byteregs[regal] = 127;
+            oldax = regs.wordregs[regax];
+            regs.wordregs[regax] = 0x7F;
             vidinterrupt();
-            regs.byteregs[regah] = oldah;
-            regs.byteregs[regal] = oldal;
+            regs.wordregs[regax] = oldax;
         }
         if (value & 0x80) videobase = 0xB8000;
         else videobase = 0xB0000;
         break;
     case 0x3C0:
         if (flip3c0) {
-            flip3c0 = 0;
             portram[0x3C0] = value & 255;
-            return;
         } else {
-            flip3c0 = 1;
             VGA_ATTR[portram[0x3C0]] = value & 255;
-            return;
         }
+        flip3c0 = ~flip3c0;
+        return;
     case 0x3C4: //sequence controller index
         portram[0x3C4] = value & 255;
         //if (portout16) VGA_SC[value & 255] = value >> 8;
@@ -596,8 +589,7 @@ void outVGA (uint16_t portnum, uint8_t value)
             break;
         case 2: //blue
             tempRGB |= value << 10;
-            palettevga[latchPal] = tempRGB;
-            latchPal = latchPal + 1;
+            palettevga[latchPal++] = tempRGB;
             break;
 #else
         case 0: //red
@@ -608,8 +600,7 @@ void outVGA (uint16_t portnum, uint8_t value)
             break;
         case 2: //blue
             tempRGB |= value << 18;
-            palettevga[latchPal] = tempRGB;
-            latchPal = latchPal + 1;
+            palettevga[latchPal++] = tempRGB;
             break;
 #endif   //__BIG_ENDIAN__
         }
@@ -669,8 +660,8 @@ uint8_t inVGA (uint16_t portnum)
         }
         case 0x3DA:
         return (port3da);
-		}
-	return (portram[portnum]); //this won't be reached, but without it the compiler gives a warning
+    }
+    return (portram[portnum]); //this won't be reached, but without it the compiler gives a warning
 }
 
 #define shiftVGA(value) {\

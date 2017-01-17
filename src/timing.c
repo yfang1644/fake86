@@ -44,7 +44,6 @@ extern void tickBlaster();
 uint64_t hostfreq = 1000000, lasttick = 0, tickgap, i8253tickgap, lasti8253tick, scanlinetiming, lastscanlinetick;
 uint64_t sampleticks, lastsampletick, ssourceticks, lastssourcetick, adlibticks, lastadlibtick, lastblastertick, gensamplerate;
 
-uint16_t pit0counter = 65535;
 extern uint8_t port3da, doaudio, slowsystem;
 
 void inittiming()
@@ -91,7 +90,6 @@ void timing()
         if (curscanline > 479) port3da = 8;
         else port3da = 0;
         if (curscanline & 1) port3da |= 1;
-        pit0counter++;
         lastscanlinetick = curtick;
     }
 

@@ -165,7 +165,7 @@ void flag_log16 (uint16_t value)
     of = 0; /* bitwise logic ops always clear carry and overflow */
 }
 
-void flag_add16 (uint16_t v1, uint16_t v2, uint16_t v3)
+uint16_t op_add16 (uint16_t v1, uint16_t v2, uint16_t v3)
 {
     uint32_t	dst;
     uint32_t    temp;
@@ -183,36 +183,39 @@ void flag_add16 (uint16_t v1, uint16_t v2, uint16_t v3)
 
     temp = (v1 ^ v2 ^ dst);
     af = (temp >> 4) & 1; /* set or clear auxilliary flag */
+    return (uint16_t)dst;
 }
 
-void flag_add8 (uint8_t v1, uint8_t v2, uint8_t v3)
+uint8_t op_add8 (uint8_t v1, uint8_t v2, uint16_t v3)
 {
     /* v1 = destination operand, v2 = source operand, v3 = carry flag */
-    uint16_t	dst;
-    uint16_t    temp;
+    int16_t	 dst;
+    uint16_t  temp;
 
     dst = (int16_t) v1 + (int16_t) v2 + (int16_t) v3;
     flag_szp8 ( (uint8_t) dst);
-    temp =  (dst ^ v1) & (dst ^ v2);
-    of = (temp >> 7) & 1; /* set or clear overflow flag */
     if (dst & 0xFF00) {
         cf = 1;
     } else {
         cf = 0; /* set or clear carry flag */
     }
 
+    temp =  (dst ^ v1) & (dst ^ v2);
+    of = (temp >> 7) & 1; /* set or clear overflow flag */
+
     temp = (v1 ^ v2 ^ dst);
     af = (temp >> 4) & 1; /* set or clear auxilliary flag */
+    return (uint8_t)dst;
 }
 
-void flag_sub8 (uint8_t v1, uint8_t v2, uint8_t v3)
+uint8_t op_sub8 (uint8_t v1, uint8_t v2, uint16_t v3)
 {
     /* v1 = destination operand, v2 = source operand, v3 = carry flag */
-    uint16_t	dst;
-    uint16_t    temp;
+    uint16_t  dst;
+    uint16_t  temp;
 
     v2 += v3;
-    dst = (uint16_t) v1 - (uint16_t) v2;
+    dst = (int16_t) v1 - (int16_t) v2;
     flag_szp8 ( (uint8_t) dst);
     if (dst & 0xFF00) {
         cf = 1;
@@ -225,9 +228,10 @@ void flag_sub8 (uint8_t v1, uint8_t v2, uint8_t v3)
 
     temp = (v1 ^ v2 ^ dst);
     af = (temp >> 4) & 1; /* set or clear auxilliary flag */
+    return (uint8_t)dst;
 }
 
-void flag_sub16 (uint16_t v1, uint16_t v2, uint16_t v3)
+uint16_t op_sub16 (uint16_t v1, uint16_t v2, uint16_t v3)
 {
     /* v1 = destination operand, v2 = source operand, v3 = carry flag */
     uint32_t	dst;
@@ -247,42 +251,7 @@ void flag_sub16 (uint16_t v1, uint16_t v2, uint16_t v3)
 
     temp = (v1 ^ v2 ^ dst);
     af = (temp >> 4) & 1; /* set or clear auxilliary flag */
-}
-
-uint8_t op_add8(uint8_t a, uint8_t b, uint8_t c)
-{
-    // a=oper1, b=oper2, c=cflag
-    uint8_t res;
-    res = a + b + c;
-    flag_add8 (a, b, c);
-    return res;
-}
-
-uint16_t op_add16(uint16_t a, uint16_t b, uint16_t c)
-{
-    // a=oper1, b=oper2, c=cflag
-    uint16_t res;
-    res = a + b + c;
-    flag_add16 (a, b, c);
-    return res;
-}
-
-uint8_t op_sub8(uint8_t a, uint8_t b, uint8_t c)
-{
-    // a=oper1, b=oper2, c=cflag
-    uint8_t res;
-    res = a - (b + c);
-    flag_sub8 (a, b, c);
-    return res;
-}
-
-uint16_t op_sub16(uint16_t a, uint16_t b, uint16_t c)
-{
-    // a=oper1, b=oper2, c=cflag
-    uint16_t res;
-    res = a - (b + c);
-    flag_sub16 (a, b, c);
-    return res;
+    return (uint16_t)dst;
 }
 
 uint8_t op_and8(uint8_t a, uint8_t b)
@@ -665,54 +634,48 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
 
     switch (reg) {
     case 0: /* ROL r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             cf = (s >> 7) & 1;
-
-            s = s << 1;
-            s = s | cf;
+            s = (s << 1) | cf;
         }
-
-        if (cnt == 1) {
-            //of = cf ^ ( (s >> 7) & 1);
-            of = (s >> 7) & cf;
-        } else of = 0;
+        cf = (s >> 7) & 1;
+        s = (s << 1) | cf;
+        of = cf ^ ( (s >> 7) & 1);
+        flag_szp8(s);
         break;
 
     case 1: /* ROR r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             cf = s & 1;
             s = (s >> 1) | (cf << 7);
         }
-
-        if (cnt == 1) {
-            of = ((s >> 7) ^ (s >> 6)) & 1;
-        }
+        cf = s & 1;
+        s = (s >> 1) | (cf << 7);
+        of = ((s >> 7) ^ (s >> 6)) & 1;
         break;
 
     case 2: /* RCL r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             oldcf = cf;
             cf = (s >> 7) & 1;
-
-            s <<= 1;
-            s |= oldcf;
+            s = (s << 1) | oldcf;
         }
-
-        if (cnt == 1) {
-            of = (cf ^ ((s >> 7))) & 1;
-        }
+        oldcf = cf;
+        cf = (s >> 7) & 1;
+        s = (s << 1) | oldcf;
+        of = cf ^ ( (s >> 7) & 1);
         break;
 
     case 3: /* RCR r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             oldcf = cf;
             cf = s & 1;
             s = (s >> 1) | (oldcf << 7);
         }
-
-        if (cnt == 1) {
-            of = ((s >> 7) ^ (s >> 6)) & 1;
-        }
+        oldcf = cf;
+        cf = s & 1;
+        s = (s >> 1) | (oldcf << 7);
+        of = ((s >> 7) ^ (s >> 6)) & 1;
         break;
 
     case 4:
@@ -732,11 +695,7 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
         break;
 
     case 5: /* SHR r/m8 */
-        if ( cnt == 1 ) {
-            of = (s >> 7) & 1;
-        } else {
-            of = 0;
-        }
+        if ( cnt == 1 )     of = (s >> 7) & 1;
     case 7: /* SAR r/m8 */
         shift = cnt - 1;
         s >>= shift;
@@ -765,51 +724,48 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
 
 	switch (reg) {
     case 0: /* ROL r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             cf = (s >> 15) & 1;
             s = (s << 1) | cf;
         }
-
-        if (cnt == 1) {
-            of = cf ^ ( (s >> 15) & 1);
-        }
+        cf = (s >> 15) & 1;
+        s = (s << 1) | cf;
+        of = cf ^ ( (s >> 15) & 1);
+        flag_szp16(s);
         break;
 
     case 1: /* ROR r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             cf = s & 1;
             s = (s >> 1) | (cf << 15);
         }
-
-        if (cnt == 1) {
-            of = ((s >> 15) ^ (s >> 14)) & 1;
-        }
+        cf = s & 1;
+        s = (s >> 1) | (cf << 15);
+        of = ((s >> 15) ^ (s >> 14)) & 1;
         break;
 
     case 2: /* RCL r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             oldcf = cf;
             cf = (s >> 15) & 1;
-
-            s <<= 1;
-            s |= oldcf;
+            s = (s << 1) | oldcf;
         }
-
-        if (cnt == 1) {
-            of = cf ^ ( (s >> 15) & 1);
-        }
+        oldcf = cf;
+        cf = (s >> 15) & 1;
+        s = (s << 1) | oldcf;
+        of = cf ^ ( (s >> 15) & 1);
         break;
 
     case 3: /* RCR r/m8 */
-        for (shift = cnt; shift--;) {
+        for (shift = 0; shift < cnt - 1; shift++) {
             oldcf = cf;
             cf = s & 1;
             s = (s >> 1) | (oldcf << 15);
         }
-
-        if (cnt == 1) {
-            of = ((s >> 15) ^ (s >> 14)) & 1;
-        }
+        oldcf = cf;
+        cf = s & 1;
+        s = (s >> 1) | (oldcf << 15);
+        of = ((s >> 15) ^ (s >> 14)) & 1;
         break;
 
     case 4:
@@ -829,11 +785,7 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
 		break;
 
     case 5: /* SHR r/m8 */
-        if ( cnt == 1 ) {
-            of = (s >> 15) & 1;
-        } else {
-            of = 0;
-        }
+        if ( cnt == 1 )     of = (s >> 15) & 1;
     case 7: /* SAR r/m8 */
         shift = cnt - 1;
         s >>= shift;
@@ -866,7 +818,7 @@ uint8_t op_grp3_8(uint8_t oper1b)
 
     case 3: /* NEG */
         res = (~oper1b) + 1;
-        flag_sub8 (0, oper1b, 0);
+        op_sub8 (0, oper1b, 0);
         if( res ) {
             cf = 1;
         } else {
@@ -939,7 +891,7 @@ uint16_t op_grp3_16(uint16_t oper1)
 
     case 3: /* NEG */
         res = (~oper1) + 1;
-        flag_sub16 (0, oper1, 0);
+        op_sub16 (0, oper1, 0);
         if(res ) {
             cf = 1;
         } else {
@@ -1301,9 +1253,9 @@ void exec86 (uint32_t execloops)
                 case 2: res8 = op_add8(oper1b, oper2b, cf); break;
                 case 3: res8 = op_sub8(oper1b, oper2b, cf); break;
                 case 4: res8 = op_and8(oper1b, oper2b); break;
-                case 5: res8 = op_sub8(oper1b, oper2b, 0); break;
+                case 5:
+                case 7: res8 = op_sub8(oper1b, oper2b, 0); break;
                 case 6: res8 = op_xor8(oper1b, oper2b); break;
-                case 7: flag_sub8 (oper1b, oper2b, 0); break;
             }
             if (opcode != 0x38)
                 writerm8 (rm, res8);
@@ -1327,9 +1279,9 @@ void exec86 (uint32_t execloops)
                 case 2: res16 = op_add16(oper1, oper2, cf); break;
                 case 3: res16 = op_sub16(oper1, oper2, cf); break;
                 case 4: res16 = op_and16(oper1, oper2); break;
+                case 7:
                 case 5: res16 = op_sub16(oper1, oper2, 0); break;
                 case 6: res16 = op_xor16(oper1, oper2); break;
-                case 7: flag_sub16 (oper1, oper2, 0); break;
             }
             if (opcode != 0x39)
                 writerm16 (rm, res16);
@@ -1353,9 +1305,9 @@ void exec86 (uint32_t execloops)
                 case 2: res8 = op_add8(oper1b, oper2b, cf); break;
                 case 3: res8 = op_sub8(oper1b, oper2b, cf); break;
                 case 4: res8 = op_and8(oper1b, oper2b); break;
+                case 7:
                 case 5: res8 = op_sub8(oper1b, oper2b, 0); break;
                 case 6: res8 = op_xor8(oper1b, oper2b); break;
-                case 7: flag_sub8 (oper1b, oper2b, 0); break;
             }
             if (opcode != 0x3A)
                 getreg8 (reg) = res8;
@@ -1385,9 +1337,9 @@ void exec86 (uint32_t execloops)
                 case 2: res16 = op_add16(oper1, oper2, cf); break;
                 case 3: res16 = op_sub16(oper1, oper2, cf); break;
                 case 4: res16 = op_and16(oper1, oper2); break;
+                case 7:
                 case 5: res16 = op_sub16(oper1, oper2, 0); break;
                 case 6: res16 = op_xor16(oper1, oper2); break;
-                case 7: flag_sub16 (oper1, oper2, 0); break;
             }
             if (opcode != 0x3B)
                 getreg16 (reg) = res16;
@@ -1410,9 +1362,9 @@ void exec86 (uint32_t execloops)
                 case 2: res8 = op_add8(oper1b, oper2b, cf); break;
                 case 3: res8 = op_sub8(oper1b, oper2b, cf); break;
                 case 4: res8 = op_and8(oper1b, oper2b); break;
+                case 7:
                 case 5: res8 = op_sub8(oper1b, oper2b, 0); break;
                 case 6: res8 = op_xor8(oper1b, oper2b); break;
-                case 7: flag_sub8 (oper1b, oper2b, 0); break;
             }
             if (opcode != 0x3C)
                 regs.byteregs[regal] = res8;
@@ -1436,9 +1388,9 @@ void exec86 (uint32_t execloops)
                 case 2: res16 = op_add16(oper1, oper2, cf); break;
                 case 3: res16 = op_sub16(oper1, oper2, cf); break;
                 case 4: res16 = op_and16(oper1, oper2); break;
+                case 7:
                 case 5: res16 = op_sub16(oper1, oper2, 0); break;
                 case 6: res16 = op_xor16(oper1, oper2); break;
-                case 7: flag_sub16 (oper1, oper2, 0); break;
             }
             if (opcode != 0x3D)
                 regs.wordregs[regax] = res16;
@@ -1864,9 +1816,9 @@ void exec86 (uint32_t execloops)
             case 2: res8 = op_add8(oper1b, oper2b, cf); break;
             case 3: res8 = op_sub8(oper1b, oper2b, cf); break;
             case 4: res8 = op_and8(oper1b, oper2b); break;
+            case 7:
             case 5: res8 = op_sub8(oper1b, oper2b, 0); break;
             case 6: res8 = op_xor8(oper1b, oper2b); break;
-            case 7: flag_sub8 (oper1b, oper2b, 0); break;
             default:
                 break;	/* to avoid compiler warnings */
             }
@@ -1888,15 +1840,14 @@ void exec86 (uint32_t execloops)
             }
 
             switch (reg) {
-            case 0:
-                res16 = op_add16(oper1, oper2, 0); break;
+            case 0: res16 = op_add16(oper1, oper2, 0); break;
             case 1: res16 = op_or16(oper1, oper2); break;
             case 2: res16 = op_add16(oper1, oper2, cf); break;
             case 3: res16 = op_sub16(oper1, oper2, cf); break;
             case 4: res16 = op_and16(oper1, oper2); break;
+            case 7:
             case 5: res16 = op_sub16(oper1, oper2, 0); break;
             case 6: res16 = op_xor16(oper1, oper2); break;
-            case 7: flag_sub16 (oper1, oper2, 0); break;
             default:
                 break;	/* to avoid compiler warnings */
             }
@@ -2075,7 +2026,7 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi]++;
             }
 
-            flag_sub8 (oper1b, oper2b, 0);
+            op_sub8 (oper1b, oper2b, 0);
             totalexec++;
             loopcount++;
             if (reptype) {
@@ -2105,7 +2056,7 @@ void exec86 (uint32_t execloops)
                 regs.wordregs[regdi] += 2;
             }
 
-            flag_sub16 (oper1, oper2, 0);
+            op_sub16 (oper1, oper2, 0);
             totalexec++;
             loopcount++;
             if (reptype) {
@@ -2220,7 +2171,7 @@ void exec86 (uint32_t execloops)
 
             oper1b = regs.byteregs[regal];
             oper2b = getmem8 (segregs[reges], regs.wordregs[regdi]);
-            flag_sub8 (oper1b, oper2b, 0);
+            op_sub8 (oper1b, oper2b, 0);
             if (df) {
                 regs.wordregs[regdi]--;
             } else {
@@ -2248,7 +2199,7 @@ void exec86 (uint32_t execloops)
 
             oper1 = regs.wordregs[regax];
             oper2 = getmem16 (segregs[reges], regs.wordregs[regdi]);
-            flag_sub16 (oper1, oper2, 0);
+            op_sub16 (oper1, oper2, 0);
             if (df) {
                 regs.wordregs[regdi] -= 2;
             } else {

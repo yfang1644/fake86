@@ -43,7 +43,7 @@ extern uint8_t VRAM[], vidmode, cgabg, vidgfxmode, vidcolor, running;
 extern uint16_t cursx, cursy, cols, rows, cursorvisible;
 extern uint8_t updatedscreen;
 extern uint16_t VGA_SC[0x100], VGA_CRTC[0x100], VGA_ATTR[0x100], VGA_GC[0x100];
-extern uint32_t videobase, textbase, x, y;
+extern uint32_t videobase;
 extern uint32_t palettecga[16], palettevga[256];
 extern uint32_t usefullscreen, usegrabmode;
 
@@ -109,18 +109,26 @@ void HideMenu();
 
 void doscrmodechange()
 {
+    uint32_t  x = 640, y = 400;   // default screen size
+
     MutexLock (screenmutex);
     if (scrmodechange) {
         if (screen != NULL) SDL_FreeSurface (screen);
 #ifdef _WIN32
         if (usefullscreen) HideMenu(); else ShowMenu();
 #endif
-        if (constantw && constanth) screen = SDL_SetVideoMode (constantw, constanth, 32, SDL_HWSURFACE | usefullscreen);
-        else if (noscale) screen = SDL_SetVideoMode (nw, nh, 32, SDL_HWSURFACE | usefullscreen);
-        else {
-            if ( (nw >= 640) || (nh >= 400) ) screen = SDL_SetVideoMode (nw, nh, 32, SDL_HWSURFACE | usefullscreen);
-            else screen = SDL_SetVideoMode (640, 400, 32, SDL_HWSURFACE | usefullscreen);
+
+        if (constantw && constanth){
+            x = constantw; y = constanth;
+        } else if (noscale) {
+            x = nw; y = nh;
+        } else {
+            if ( (nw >= 640) || (nh >= 400) ) {
+                x = nw; y = nh; 
+            }
         }
+        screen = SDL_SetVideoMode (x , y, 32, SDL_HWSURFACE | usefullscreen);
+
         if (usefullscreen) SDL_WM_GrabInput (SDL_GRAB_ON); //always have mouse grab turned on for full screen mode
         else SDL_WM_GrabInput (usegrabmode);
         SDL_ShowCursor (SDL_DISABLE);

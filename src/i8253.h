@@ -26,7 +26,6 @@ struct i8253_s {
     uint16_t chandata;
     uint8_t accessmode;
     uint8_t bytetoggle;
-    float chanfreq;
     uint16_t counter;
     uint16_t latched;
     uint8_t latch;

@@ -79,7 +79,7 @@ uint8_t audiobufferfilled()
 void tickaudio()
 {
     int16_t sample;
-    if (audbufptr >= usebuffersize) return;
+    if (audiobufferfilled())   return;
     sample = adlibgensample(usesamplerate) >> 4;
     if (usessource) sample += getssourcebyte();
     sample += getBlasterSample();

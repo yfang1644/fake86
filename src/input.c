@@ -24,7 +24,8 @@
 #include <stdint.h>
 #include "ports.h"
 
-uint8_t translatescancode (uint16_t keyval) {
+uint8_t translatescancode (uint16_t keyval)
+{
 	switch (keyval) {
     case 0x1B:
         return (1); //Esc
@@ -290,10 +291,8 @@ uint8_t handleinput()
         break;
     case SDL_QUIT:
         return 0;
-        break;
     default:
         return 1;
-        break;
     }
     return 1;
 }

@@ -21,18 +21,22 @@
 
 #include "config.h"
 #include <stdint.h>
-#include "i8253.h"
-#include "mutex.h"
-
-extern struct i8253_s i8253[];
+#include "ports.h"
 
 int16_t speakergensample(uint64_t samplerate)
 {
     int16_t speakervalue;
+    uint8_t chanfreq;           // 8253 ch2
     uint64_t speakerfullstep;
     static uint64_t speakercurstep = 0;
 
-    speakerfullstep = (uint64_t) ( (float) samplerate / (float) i8253[2].chanfreq);
+    chanfreq = portin(0x42);
+    chanfreq |= (uint16_t)portin(0x42) << 8;
+    if (chanfreq) {
+        speakerfullstep = (uint64_t) ( (float) samplerate / chanfreq);
+    } else {
+        speakerfullstep = (uint64_t) ( (float) samplerate / 65536.0);
+    }
     if (speakerfullstep < 2) speakerfullstep = 2;
     if (speakercurstep < speakerfullstep/2) {
         speakervalue = 32;

@@ -34,8 +34,8 @@ extern struct struct_drive disk[256];
 #endif
 
 extern char *biosfile;
-extern uint8_t bootdrive, ethif, verbose, cgaonly, usessource, noscale, nosmooth, renderbenchmark, useconsole, doaudio;
-extern uint32_t framedelay, textbase, usefullscreen, speed;
+extern uint8_t bootdrive, ethif, verbose, usessource, noscale, nosmooth, renderbenchmark, useconsole, doaudio;
+extern uint32_t framedelay, usefullscreen, speed;
 extern uint32_t usesamplerate, latency;
 uint16_t constantw = 0, constanth = 0;
 uint8_t slowsystem = 0;
@@ -114,7 +114,6 @@ void parsecl (int argc, char *argv[])
     }
 
     bootdrive = 254;
-    textbase = 0xB8000;
     ethif = 254;
     usefullscreen = 0;
     biosfile = PATH_DATAFILES "pcxtbios.bin";

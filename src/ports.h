@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 #define ADLIBPORT   (0x388)
+#define SERIALPORT  (0x3F8)
 #define PARPORT     (0x378)
 
 void portout (uint16_t portnum, uint8_t value);

@@ -640,8 +640,7 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
         }
         cf = (s >> 7) & 1;
         s = (s << 1) | cf;
-        of = cf ^ ( (s >> 7) & 1);
-        flag_szp8(s);
+        of = (cf ^ (s >> 7)) & 1;
         break;
 
     case 1: /* ROR r/m8 */
@@ -663,7 +662,7 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
         oldcf = cf;
         cf = (s >> 7) & 1;
         s = (s << 1) | oldcf;
-        of = cf ^ ( (s >> 7) & 1);
+        of = (cf ^ (s >> 7)) & 1;
         break;
 
     case 3: /* RCR r/m8 */
@@ -683,15 +682,8 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
         shift = cnt - 1;
         s <<= shift;
         cf = (s >> 7) & 1;
+        of = (cf ^ (s >> 6)) & 1;
         s <<= 1;
-
-        if ( (cnt == 1) && (cf == (s >> 7) ) ) {
-            of = 0;
-        } else {
-            of = 1;
-        }
-
-        flag_szp8 (s);
         break;
 
     case 5: /* SHR r/m8 */
@@ -703,10 +695,10 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
         s >>= 1;
 
         if(reg == 7)  of = 0;
-        flag_szp8 (s);
         break;
     }
 
+    flag_szp8 (s);
 	return s;
 }
 
@@ -715,7 +707,6 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
     uint32_t shift;
     uint32_t oldcf;
 
-	oldcf = cf;
 #ifdef CPU_LIMIT_SHIFT_COUNT
 	cnt &= 0x1F;
 #endif
@@ -742,6 +733,7 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         cf = s & 1;
         s = (s >> 1) | (cf << 15);
         of = ((s >> 15) ^ (s >> 14)) & 1;
+        flag_szp16(s);
         break;
 
     case 2: /* RCL r/m8 */
@@ -754,6 +746,7 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         cf = (s >> 15) & 1;
         s = (s << 1) | oldcf;
         of = cf ^ ( (s >> 15) & 1);
+        flag_szp16(s);
         break;
 
     case 3: /* RCR r/m8 */
@@ -765,7 +758,9 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         oldcf = cf;
         cf = s & 1;
         s = (s >> 1) | (oldcf << 15);
+        sf = (s >> 15) & 1;
         of = ((s >> 15) ^ (s >> 14)) & 1;
+//       flag_szp16(s);  //* WHY can't set ZF???
         break;
 
     case 4:
@@ -773,15 +768,9 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         shift = cnt - 1;
         s <<= shift;
         cf = (s >> 15) & 1;
+        of = (cf ^ (s >> 14)) & 1;
         s <<= 1;
-
-        if ( (cnt == 1) && (cf == (s >> 15) ) ) {
-            of = 0;
-        } else {
-            of = 1;
-        }
-
-        flag_szp16 ( (uint16_t) s);
+        flag_szp16 (s);
 		break;
 
     case 5: /* SHR r/m8 */

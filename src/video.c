@@ -329,7 +329,7 @@ uint32_t palettevga[256] = {
 
 uint32_t usefullscreen = 0, usegrabmode = SDL_GRAB_OFF;
 
-uint8_t latchRGB = 0, latchPal = 0, VGA_latch[4], stateDAC = 0;
+uint8_t VGA_latch[4], stateDAC = 0;
 uint8_t latchReadRGB = 0, latchReadPal = 0;
 
 extern uint32_t nw, nh;
@@ -528,9 +528,10 @@ void vidinterrupt()
 uint16_t vtotal = 0;
 void outVGA (uint16_t portnum, uint8_t value)
 {
-    uint8_t oldax;
+    uint16_t oldax;
     uint8_t flip3c0 = 0;
-    static uint32_t tempRGB;
+    uint32_t tempRGB;
+    static uint8_t latchRGB = 0, latchPal = 0;
 
     updatedscreen = 1;
     switch (portnum) {
@@ -574,7 +575,6 @@ void outVGA (uint16_t portnum, uint8_t value)
     case 0x3C8: //color index register (write operations)
         latchPal = value & 255;
         latchRGB = 0;
-        tempRGB = 0;
         stateDAC = 3;
         break;
     case 0x3C9: //RGB data register

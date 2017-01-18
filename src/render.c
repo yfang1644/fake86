@@ -305,15 +305,10 @@ void draw ()
         nw = 640;
         nh = 400;
         vgapage = ( (uint32_t) VGA_CRTC[0xC]<<8) + (uint32_t) VGA_CRTC[0xD];
+        divx = (cols == 80) ? 1: 2;
         for (y=0; y<nh; y++){
             for (x=0; x<nw; x++) {
-                if (cols==80) {
-                    charx = x/8;
-                    divx = 1;
-                } else {
-                    charx = x/16;
-                    divx = 2;
-                }
+                charx = x/8/divx;
                 if ( (portin(0x3D8)==9) && (portin(0x3D4)==9) ) {
                     chary = y/4;
                     vidptr = vgapage + videobase + chary*cols*2 + charx*2;
@@ -519,8 +514,7 @@ void draw ()
     if (vidgfxmode==0) {
         if (cursorvisible) {
             curheight = 2;
-            if (cols==80) blockw = 8;
-            else blockw = 16;
+            blockw = (cols==80) ? 8: 16;
             x1 = cursx * blockw;
             y1 = cursy * 8 + 8 - curheight;
             curpixel = RAM[videobase+cursy*cols*2+cursx*2+1]&15;

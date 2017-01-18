@@ -698,7 +698,7 @@ uint8_t op_grp2_8 (uint8_t s, uint8_t cnt)
         break;
     }
 
-    flag_szp8 (s);
+    flag_szp8(s);
 	return s;
 }
 
@@ -722,7 +722,6 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         cf = (s >> 15) & 1;
         s = (s << 1) | cf;
         of = cf ^ ( (s >> 15) & 1);
-        flag_szp16(s);
         break;
 
     case 1: /* ROR r/m8 */
@@ -733,7 +732,6 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         cf = s & 1;
         s = (s >> 1) | (cf << 15);
         of = ((s >> 15) ^ (s >> 14)) & 1;
-        flag_szp16(s);
         break;
 
     case 2: /* RCL r/m8 */
@@ -746,7 +744,6 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         cf = (s >> 15) & 1;
         s = (s << 1) | oldcf;
         of = cf ^ ( (s >> 15) & 1);
-        flag_szp16(s);
         break;
 
     case 3: /* RCR r/m8 */
@@ -758,9 +755,8 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         oldcf = cf;
         cf = s & 1;
         s = (s >> 1) | (oldcf << 15);
-        sf = (s >> 15) & 1;
         of = ((s >> 15) ^ (s >> 14)) & 1;
-//       flag_szp16(s);  //* WHY can't set ZF???
+        return (s);
         break;
 
     case 4:
@@ -770,7 +766,6 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         cf = (s >> 15) & 1;
         of = (cf ^ (s >> 14)) & 1;
         s <<= 1;
-        flag_szp16 (s);
 		break;
 
     case 5: /* SHR r/m8 */
@@ -782,10 +777,9 @@ uint16_t op_grp2_16 (uint16_t s, uint8_t cnt)
         s >>= 1;
 
         if(reg == 7)  of = 0;
-        flag_szp16 (s);
         break;
     }
-
+    flag_szp16(s);
     return s;
 }
 
@@ -1136,7 +1130,7 @@ uint32_t prefetch_base = 0;
 void exec86 (uint32_t execloops)
 {
     uint16_t oldcf, oldsp;
-    uint8_t tempcf, reptype, res8 = 0;
+    uint8_t reptype, res8 = 0;
     uint16_t temp16, res16 = 0;
     uint32_t loopcount;
     uint8_t docontinue, nestlev;
@@ -1160,7 +1154,11 @@ void exec86 (uint32_t execloops)
             intcall86 (nextintr() );	/* get next interrupt from the i8259, if any */
         }
 
-        if (hltstate) goto skipexecution;
+        if (hltstate) continue;
+
+        if (!running) {
+            break;
+        }
 
         /*if ((((uint32_t)segregs[regcs] << 4) + (uint32_t)ip) == 0xFEC59) {
         //printf("Entered F000:EC59, returning to ");
@@ -1617,7 +1615,7 @@ void exec86 (uint32_t execloops)
             push (getmem8 (segregs[regcs], ip++) );
             break;
 
-        case 0x6C:	/* 6E INSB */
+        case 0x6C:	/* 6C INSB */
         case 0x6E:	/* 6E OUTSB */
         case 0xA4:	/* A4 MOVSB */
             if (reptype && (regs.wordregs[regcx] == 0) ) {
@@ -2566,13 +2564,13 @@ void exec86 (uint32_t execloops)
         case 0xFE:	/* FE GRP4 Eb */
             modregrm();
             oper1b = readrm8 (rm);
-            tempcf = cf;
+            temp16 = cf;
             if (!reg) {
                 res8 = op_add8 (oper1b, 1, 0);
             } else {
                 res8 = op_sub8 (oper1b, 1, 0);
             }
-            cf = tempcf;
+            cf = temp16;
             writerm8 (rm, res8);
             break;
 
@@ -2594,10 +2592,6 @@ void exec86 (uint32_t execloops)
                 printf ("Illegal opcode: %02X %02X /%X @ %04X:%04X\n", getmem8(savecs, saveip), getmem8(savecs, saveip+1), (getmem8(savecs, saveip+2) >> 3) & 7, savecs, saveip);
             }
             break;
-        }
-skipexecution:
-        if (!running) {
-            return;
         }
     }
 }
